@@ -3,7 +3,7 @@ Contributors: kylegilman
 Tags: video, html5, shortcode, thumbnail, ffmpeg
 Requires at least: 3.0
 Tested up to: 3.2.1
-Stable tag: 1.0
+Stable tag: 1.0.2
 
 Generates thumbnails, HTML5-compliant videos, and embed codes for locally hosted videos. Requires FFMPEG for thumbnails and encodes.
 
@@ -58,9 +58,6 @@ I'm not really a software developer. I'm just a film editor with some time on hi
 
 Some of it will work without FFMPEG. You can generate embed codes for your videos on any host because that part of the plugin is JavaScript running in your browser. Without FFMPEG you won't be able to generate thumbnails or generate HTML5 videos. There is no way around this. A program has to read the video files in order to generate the thumbnails, and FFMPEG is the best one I've found to do that.
 
-= Why do I have to upload the video separately and then copy and paste the URL? =
-
-Because I am not a great programmer, and this was too much for me to figure out. In the future I'm hoping to integrate the plugin with the upload dialog box to streamline the process.
 
 == Screenshots ==
 
@@ -69,6 +66,10 @@ Because I am not a great programmer, and this was too much for me to figure out.
 3. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+1.0.2 Fixed a shocking number of unenclosed stings in get_options() calls. Bad programming. Didn't affect functionality, but will stop generating errors. Removed clumsy check for FFMPEG running. Was preventing encoding if ANY user on the server was running FFMPEG. Be wary of overusing your system resources though.
+
+1.0.1 Quick fix to add mdetect.php to the plugin package from Wordpress
 
 1.0 Huge re-write. Integrated with Wordpress Media Library and added WEBM support. Increased control over thumbnail generation. Added tab to Insert Video dialog box for adding by URL (like the old version).
 
