@@ -49,6 +49,14 @@ I'm not really a software developer. I'm just a film editor with some time on hi
 
 1. Upload the unzipped folder `video-embed-thumbnail-generator` to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. Make sure you have all your MIME types configured correctly. Many servers don't have .mp4, .m4v, .ogv configured, and even more don't have .webm. There are a number of ways to do this. In your public_html directory you can edit your .htaccess file and add the following lines:
+
+`AddType video/ogg .ogv
+AddType video/mp4 .mp4
+AddType video/mp4 .m4v
+AddType video/webm .webm`
+
+Or use your web host's configuration panel (cpanel, etc) to add a custom MIME type.
 1. Follow instructions on the Description page.
 
 == Frequently Asked Questions ==
