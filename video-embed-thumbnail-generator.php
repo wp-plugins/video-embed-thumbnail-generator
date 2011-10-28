@@ -3,7 +3,7 @@
 Plugin Name: Video Embed & Thumbnail Generator
 Plugin URI: http://www.kylegilman.net/2011/01/18/video-embed-thumbnail-generator-wordpress-plugin/
 Description: Generate video thumbnails, HTML5-compliant videos, and video embed shortcodes. Some functions require FFMPEG.
-Version: 1.0	
+Version: 1.0.3	
 Author: Kyle Gilman
 Author URI: http://www.kylegilman.net/
 
@@ -120,7 +120,7 @@ function video_embed_thumbnail_generator_activate() {
 register_activation_hook( __FILE__, 'video_embed_thumbnail_generator_activate' );
 
 function addSWFObject() {
-	if(get_option(wp_FMP_swfobject) == "true") {
+	if(get_option('wp_FMP_swfobject') == "true") {
 		echo "\n<script src=\"http://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js\" type=\"text/javascript\"></script>\n";
 	}
 }
@@ -132,23 +132,23 @@ function FMP_shortcode($atts, $content = ''){
 		if(substr($content, 0, 1) == '/') $content = get_bloginfo('url').$content;
 	
 		$query_atts = shortcode_atts(
-						array('width' => get_option(wp_FMP_width), 
-							  'height' => get_option(wp_FMP_height),
-							  'controlbar' => get_option(wp_FMP_controlbar_style),
-							  'autohide' => get_option(wp_FMP_autohide),
-							  'poster' => get_option(wp_FMP_poster),
-							  'playbutton' => get_option(wp_FMP_playbutton),
-							  'loop' => get_option(wp_FMP_loop),
-							  'autoplay' => get_option(wp_FMP_autoplay),
-							  'streamtype' => get_option(wp_FMP_stream_type),
-							  'scalemode' => get_option(wp_FMP_scale_mode),
-							  'backgroundcolor' => get_option(wp_FMP_bgcolor),
-							  'configuration' => get_option(wp_FMP_configuration),
-							  'skin' => get_option(wp_FMP_skin)), $atts); 
+						array('width' => get_option('wp_FMP_width'), 
+							  'height' => get_option('wp_FMP_height'),
+							  'controlbar' => get_option('wp_FMP_controlbar_style'),
+							  'autohide' => get_option('wp_FMP_autohide'),
+							  'poster' => get_option('wp_FMP_poster'),
+							  'playbutton' => get_option('wp_FMP_playbutton'),
+							  'loop' => get_option('wp_FMP_loop'),
+							  'autoplay' => get_option('wp_FMP_autoplay'),
+							  'streamtype' => get_option('wp_FMP_stream_type'),
+							  'scalemode' => get_option('wp_FMP_scale_mode'),
+							  'backgroundcolor' => get_option('wp_FMP_bgcolor'),
+							  'configuration' => get_option('wp_FMP_configuration'),
+							  'skin' => get_option('wp_FMP_skin')), $atts); 
 
 		$div_suffix = substr(uniqid(rand(), true),0,4);
 
-		if(get_option(wp_FMP_http_streaming) != "true") {
+		if(get_option('wp_FMP_http_streaming') != "true") {
 			$video_swf = "http://fpdownload.adobe.com/strobe/FlashMediaPlayback.swf";
 			$minimum_flash = "10.0.0";
 		} else {
@@ -196,7 +196,7 @@ function FMP_shortcode($atts, $content = ''){
 		
 		$params = "{allowfullscreen:'true', allowscriptaccess:'always'}";
 		
-		if(get_option(wp_FMP_HTML5) == "true") {
+		if(get_option('wp_FMP_HTML5') == "true") {
 			include_once dirname( __FILE__ ) .'/mdetect.php';
 			$uagent_obj = new uagent_info();
 			$isAndroid = $uagent_obj->DetectAndroid(); //determine if we're running on an Android device
@@ -267,7 +267,7 @@ function FMP_shortcode($atts, $content = ''){
 			$code .= "</video>\n";
 			$code .= "</div>\n\n";
 		} else {
-			if ( in_array($moviefiletype, $flashcompatible) ) { $code = "<div id=\"flashcontent".$div_suffix."\">".get_option(wp_FMP_flashplayer)."</div>\n\n"; }
+			if ( in_array($moviefiletype, $flashcompatible) ) { $code = "<div id=\"flashcontent".$div_suffix."\">".get_option('wp_FMP_flashplayer')."</div>\n\n"; }
 		}
 		
 		if ( in_array($moviefiletype, $flashcompatible) ) { 
@@ -277,14 +277,14 @@ function FMP_shortcode($atts, $content = ''){
 		}
 
 		return $code;
-	}
-
+}
+add_shortcode('FMP', 'FMP_shortcode');
 	
-	function addFMPOptionsPage() {
+function addFMPOptionsPage() {
 		add_options_page('Video Embed & Thumbnail Generator', 'Video Embed & Thumbnail Generator', 8, basename(__FILE__), 'FMPOptionsPage');
 	}	
 
-	function FMPOptionsPage() {
+function FMPOptionsPage() {
 
 		if (isset($_POST['wp_FMP_reset'])) {
 			update_option(wp_FMP_swfobject, wp_FMP_swfobject_default);
@@ -410,7 +410,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_swfobject' id='wp_FMP_swfobject' value='use' ";
-								if(get_option(wp_FMP_swfobject) == "true") {
+								if(get_option('wp_FMP_swfobject') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -426,7 +426,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_HTML5' id='wp_FMP_HTML5' value='use' ";
-								if(get_option(wp_FMP_HTML5) == "true") {
+								if(get_option('wp_FMP_HTML5') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -442,7 +442,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_encodeogg' id='wp_FMP_encodeogg' value='use' ";
-								if(get_option(wp_FMP_encodeogg) == "true") {
+								if(get_option('wp_FMP_encodeogg') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -459,7 +459,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_encodewebm' id='wp_FMP_encodewebm' value='use' ";
-								if(get_option(wp_FMP_encodewebm) == "true") {
+								if(get_option('wp_FMP_encodewebm') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -475,7 +475,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_http_streaming' id='wp_FMP_http_streaming' value='use' ";
-								if(get_option(wp_FMP_http_streaming) == "true") {
+								if(get_option('wp_FMP_http_streaming') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -489,7 +489,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<textarea name="wp_FMP_flashplayer" id="wp_FMP_flashplayer" rows="5" cols="50"><?php echo get_option(wp_FMP_flashplayer) ?></textarea><br />
+							<textarea name="wp_FMP_flashplayer" id="wp_FMP_flashplayer" rows="5" cols="50"><?php echo get_option('wp_FMP_flashplayer') ?></textarea><br />
 							<em>This message will only be shown if HTML5 video fallback is disabled</em>
 						</td>	
 					</tr>
@@ -506,7 +506,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_ffmpeg" id="wp_FMP_ffmpeg" type="text" value="<?php echo get_option(wp_FMP_ffmpeg) ?>" /><br />
+							<input name="wp_FMP_ffmpeg" id="wp_FMP_ffmpeg" type="text" value="<?php echo get_option('wp_FMP_ffmpeg') ?>" /><br />
 							<em><small>Don't include trailing slash. Example: /usr/local/bin</small></em>
 						</td>	
 					</tr>
@@ -520,7 +520,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_width" id="wp_FMP_width" type="text" value="<?php echo get_option(wp_FMP_width) ?>" />
+							<input name="wp_FMP_width" id="wp_FMP_width" type="text" value="<?php echo get_option('wp_FMP_width') ?>" />
 						</td>	
 					</tr>
 					<tr>
@@ -529,7 +529,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_height" id="wp_FMP_height" type="text" value="<?php echo get_option(wp_FMP_height) ?>" />
+							<input name="wp_FMP_height" id="wp_FMP_height" type="text" value="<?php echo get_option('wp_FMP_height') ?>" />
 						</td>	
 					</tr>
 					<tr>
@@ -538,7 +538,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_bgcolor" id="wp_FMP_bgcolor" type="text" value="<?php echo get_option(wp_FMP_bgcolor) ?>" />
+							<input name="wp_FMP_bgcolor" id="wp_FMP_bgcolor" type="text" value="<?php echo get_option('wp_FMP_bgcolor') ?>" />
 						</td>	
 					</tr>
 					<tr>
@@ -547,7 +547,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_configuration" id="wp_FMP_configuration" type="text" size="50" value="<?php echo get_option(wp_FMP_configuration) ?>" />
+							<input name="wp_FMP_configuration" id="wp_FMP_configuration" type="text" size="50" value="<?php echo get_option('wp_FMP_configuration') ?>" />
 						</td>	
 					</tr>
 					<tr>
@@ -556,7 +556,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input name="wp_FMP_skin" id="wp_FMP_skin" type="text" size="50" value="<?php echo get_option(wp_FMP_skin) ?>" />
+							<input name="wp_FMP_skin" id="wp_FMP_skin" type="text" size="50" value="<?php echo get_option('wp_FMP_skin') ?>" />
 						</td>	
 					</tr>					
 					<tr>
@@ -572,16 +572,16 @@ function FMP_shortcode($atts, $content = ''){
 									$recorded = "";
 									$dvr = "";
 									
-									if(get_option(wp_FMP_stream_type) == "liveOrRecorded") {
+									if(get_option('wp_FMP_stream_type') == "liveOrRecorded") {
 										$liveOrRecorded = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_stream_type) == "live") {
+									if(get_option('wp_FMP_stream_type') == "live") {
 										$live = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_stream_type) == "recorded") {
+									if(get_option('wp_FMP_stream_type') == "recorded") {
 										$recorded = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_stream_type) == "dvr") {
+									if(get_option('wp_FMP_stream_type') == "dvr") {
 										$dvr = " selected=\"selected\"";
 									}
 									
@@ -606,16 +606,16 @@ function FMP_shortcode($atts, $content = ''){
 									$stretch = "";
 									$zoom = "";
 									
-									if(get_option(wp_FMP_scale_mode) == "letterbox") {
+									if(get_option('wp_FMP_scale_mode') == "letterbox") {
 										$letterbox = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_scale_mode) == "none") {
+									if(get_option('wp_FMP_scale_mode') == "none") {
 										$none = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_scale_mode) == "stretch") {
+									if(get_option('wp_FMP_scale_mode') == "stretch") {
 										$stretch = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_scale_mode) == "zoom") {
+									if(get_option('wp_FMP_scale_mode') == "zoom") {
 										$zoom = " selected=\"selected\"";
 									}
 									
@@ -638,13 +638,13 @@ function FMP_shortcode($atts, $content = ''){
 									$docked = "";
 									$floating = "";
 									$none = "";
-									if(get_option(wp_FMP_controlbar_style) == "docked") {
+									if(get_option('wp_FMP_controlbar_style') == "docked") {
 										$docked = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_controlbar_style) == "floating") {
+									if(get_option('wp_FMP_controlbar_style') == "floating") {
 										$floating = " selected=\"selected\"";
 									}
-									if(get_option(wp_FMP_controlbar_style) == "none") {
+									if(get_option('wp_FMP_controlbar_style') == "none") {
 										$none = " selected=\"selected\"";
 									}
 								?>
@@ -660,7 +660,7 @@ function FMP_shortcode($atts, $content = ''){
 						</th>
 						<td width="10"></td>
 						<td>
-							<input type='text' name='wp_FMP_poster' id='wp_FMP_poster' size='50' value='<?php echo get_option(wp_FMP_poster) ?>' />
+							<input type='text' name='wp_FMP_poster' id='wp_FMP_poster' size='50' value='<?php echo get_option('wp_FMP_poster') ?>' />
 						</td>	
 					</tr>
 					<tr>
@@ -671,7 +671,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_autohide' id='wp_FMP_autohide' value='use' ";
-								if(get_option(wp_FMP_autohide) == "true") {
+								if(get_option('wp_FMP_autohide') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -687,7 +687,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_autoplay' id='wp_FMP_autoplay' value='use' ";
-								if(get_option(wp_FMP_autoplay) == "true") {
+								if(get_option('wp_FMP_autoplay') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -703,7 +703,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_loop' id='wp_FMP_loop' value='use' ";
-								if(get_option(wp_FMP_loop) == "true") {
+								if(get_option('wp_FMP_loop') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -719,7 +719,7 @@ function FMP_shortcode($atts, $content = ''){
 						<td>
 							<?php
 								echo "<input type='checkbox' name='wp_FMP_playbutton' id='wp_FMP_playbutton' value='use' ";
-								if(get_option(wp_FMP_playbutton) == "true") {
+								if(get_option('wp_FMP_playbutton') == "true") {
 									echo "checked";
 								}
 								echo " />\n";
@@ -785,7 +785,7 @@ function kg_addPostSave($post_id) {
 	}//if post not already saved
 	$flag = 1;
 }
-
+add_action('save_post', 'kg_addPostSave');
 
 
     /** 
@@ -867,13 +867,14 @@ function kg_addPostSave($post_id) {
 		}
 		else { if ( !url_exists($thumbnail_url) ) { $thumbnail_url = ""; } }
 
+	$thumbnail_html = "";
         if ($thumbnail_url != "" ) { 		
 		$thumbnail_html = '<div style="border-style:solid; border-color:#ccc; border-width:3px; width:200px; text-align:center; margin:10px;"><img width="200" src="'.$thumbnail_url.'"></div>'; 
 	}
 
         $form_fields["generator"]["label"] = __("Thumbnails");
         $form_fields["generator"]["input"] = "html";
-        $form_fields["generator"]["html"] = '<div id="attachments_'. $post->ID .'_thumbnailplaceholder">'. $thumbnail_html .'</div><input id="attachments_'. $post->ID .'_numberofthumbs" type="text" value="4" maxlength="2" size="4" style="width:25px;" title="Number of Thumbnails" onchange="document.getElementById(\'attachments['.$post->ID.'][thumbtime]\').value =\'\';"><input type="button" id="attachments['. $post->ID .'][thumbgenerate]" class="button-secondary" value="Generate" name="thumbgenerate" onclick="kg_generate_thumb('. $post->ID .', \'generate\');"/><input type="button" id="thumbrandomize" class="button-secondary" value="Randomize" name="thumbrandomize" onclick="kg_generate_thumb('. $post->ID .', \'random\');" /><input type="button" id="attachments['. $post->ID .'][deletebutton]" class="button-secondary" value="Delete" name="deletebutton" onclick="kg_generate_thumb('. $post->ID .', \'delete\');"/> <input type="checkbox" id="attachments_'. $post->ID .'_firstframe"><label for="attachments_'. $post->ID .'_firstframe">Force 1st Frame Thumbnail</label>';
+        $form_fields["generator"]["html"] = '<div id="attachments_'. $post->ID .'_thumbnailplaceholder">'. $thumbnail_html .'</div><input id="attachments_'. $post->ID .'_numberofthumbs" type="text" value="4" maxlength="1" size="4" style="width:25px;" title="Number of Thumbnails" onchange="document.getElementById(\'attachments['.$post->ID.'][thumbtime]\').value =\'\';"><input type="button" id="attachments['. $post->ID .'][thumbgenerate]" class="button-secondary" value="Generate" name="thumbgenerate" onclick="kg_generate_thumb('. $post->ID .', \'generate\');"/><input type="button" id="thumbrandomize" class="button-secondary" value="Randomize" name="thumbrandomize" onclick="kg_generate_thumb('. $post->ID .', \'random\');" /><input type="button" id="attachments['. $post->ID .'][deletebutton]" class="button-secondary" value="Delete" name="deletebutton" onclick="kg_generate_thumb('. $post->ID .', \'delete\');"/> <input type="checkbox" id="attachments_'. $post->ID .'_firstframe"><label for="attachments_'. $post->ID .'_firstframe">Force 1st Frame Thumbnail</label>';
 
         $form_fields["thumbtime"]["label"] = __("Thumbnail Timecode");
         $form_fields["thumbtime"]["value"] = get_post_meta($post->ID, "_kgflashmediaplayer-thumbtime", true);
@@ -920,13 +921,19 @@ function kg_addPostSave($post_id) {
         // $attachment part of the form $_POST ($_POST[attachments][postID])  
         // $post attachments wp post array - will be saved after returned  
         //     $post['post_type'] == 'attachment'  
-        if( isset($attachment['kgflashmediaplayer-poster']) ) { 
-                if ( !url_exists($attachment['kgflashmediaplayer-poster']) ) {
-			$uploads = wp_upload_dir();
-			$posterfile = pathinfo($attachment['kgflashmediaplayer-poster'], PATHINFO_BASENAME);
-			$tmp_posterpath = $uploads['path'].'/thumb_tmp/'.$posterfile;
-			if ( is_file($tmp_posterpath) ) { copy($tmp_posterpath, $uploads['path'].'/'.$posterfile); }
-			rrmdir($uploads['path'].'/thumb_tmp');
+        if( isset($attachment['kgflashmediaplayer-poster']) ) {
+		$uploads = wp_upload_dir();
+		$posterfile = pathinfo($attachment['kgflashmediaplayer-poster'], PATHINFO_BASENAME);
+		$tmp_posterpath = $uploads['path'].'/thumb_tmp/'.$posterfile;
+                if ( !is_file($uploads['path'].'/'.$posterfile) ) {
+			if ( is_file($tmp_posterpath) ) { 
+				copy($tmp_posterpath, $uploads['path'].'/'.$posterfile);
+				$thumb_base = substr($tmp_posterpath, 0, -5);
+				foreach (glob($thumb_base."?.jpg") as $thumbfilename) {
+				   unlink($thumbfilename);
+				}
+			}
+			rmdir($uploads['path'].'/thumb_tmp');
 		}
 		update_post_meta($post['ID'], '_kgflashmediaplayer-poster', $attachment['kgflashmediaplayer-poster']); 
 	}
@@ -1045,7 +1052,7 @@ media_upload_header();
 			<tr class="submit">
 				<td></td>
 				<td>
-					<input type="submit" onclick="kg_insert_shortcode();" name="insertonlybutton" id="insertonlybutton" class="button" value="Insert into Post"  />
+					<input type="submit" onclick="kg_generate_thumb('singleurl', 'submit'); kg_insert_shortcode();" name="insertonlybutton" id="insertonlybutton" class="button" value="Insert into Post"  />
 				</td>
 			</tr>
 </tbody></table>
@@ -1071,22 +1078,36 @@ $maxwidth = get_option('wp_FMP_width');
 </form>
 
 <?php
-}
+} //end media_embedurl_process
+
 function kg_embedurl_handle() {
     return wp_iframe( 'media_embedurl_process');
 }
 add_action('media_upload_embedurl', 'kg_embedurl_handle');
 
 
-function enqueue_kg_script() {
+
+
+function kg_cleanup_generated_thumbnails_handler($posterurl) {
+	$uploads = wp_upload_dir();
+	rrmdir($uploads['path'].'/thumb_tmp'); //remove the whole tmp file directory
+}
+add_action('kg_cleanup_generated_thumbnails','kg_cleanup_generated_thumbnails_handler');
+
+function kg_schedule_cleanup_generated_files() { //schedules deleting all tmp thumbnails if no thumbnails are generated in an hour
+	$timestamp = wp_next_scheduled( 'kg_cleanup_generated_thumbnails' );
+	wp_unschedule_event($timestamp, 'kg_cleanup_generated_thumbnails' );
+	wp_schedule_single_event(time()+3600, 'kg_cleanup_generated_thumbnails');
+	die(); // this is required to return a proper result
+}
+add_action('wp_ajax_kg_schedule_cleanup_generated_files', 'kg_schedule_cleanup_generated_files');
+
+function enqueue_kg_script() { //loads plugin-related javascripts
     wp_enqueue_script( 'video_embed_thumbnail_generator_script', plugins_url('/kg_video_plugin.js', __FILE__) );
 }
+add_action('admin_enqueue_scripts', 'enqueue_kg_script');
 
 add_action('wp_head', 'addSWFObject');
 add_action('admin_menu', 'addFMPOptionsPage');
-add_action('save_post', 'kg_addPostSave');
-add_action('admin_enqueue_scripts', 'enqueue_kg_script');
-
-add_shortcode('FMP', 'FMP_shortcode');
 
 ?>
