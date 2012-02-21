@@ -62,7 +62,7 @@ After you save the post, the thumbnail file will be registered in the Wordpress 
 * `configuration="http://www.example.com/config.xml"` Lets you specify all these flashvars in an XML file.
 * `skin="http://www.example.com/skin.xml"` Completely change the look of the video player. <a href="http://www.longtailvideo.com/support/jw-player/jw-player-for-flash-v5/14/building-skins">Instructions here.</a>
 
-I'm not really a software developer. I'm just a film editor with some time on his hands who wanted to post video for clients and wasn't happy with the current state of any available software. But I want to really make this thing work, so please help me out by posting your feedback in the comments. I'm developing the plugin on a VPS and I haven't tested it on any other FFMPEG-enabled servers yet, so I'm sure there are all kinds of things that only work because of my particular server setup.
+I'm not really a software developer. I'm just a film editor with some time on his hands who wanted to post video for clients and wasn't happy with the current state of any available software. But I want to really make this thing work, so please help me out by posting your feedback in the comments.
 
 == Installation ==
 
@@ -88,7 +88,7 @@ WordPress already has <a href="http://codex.wordpress.org/Embeds">a built-in sys
 
 Some of it will work without FFMPEG. You can generate embed codes for your videos on any host because that part of the plugin is JavaScript running in your browser. But without FFMPEG you won't be able to generate thumbnails or generate HTML5 videos. There is no way around this. A program has to read the video files in order to generate the thumbnails, and FFMPEG is the best one I've found to do that.
 
-= Why doesn't the encoding progress bar work on Windows? =
+= Why doesn't the encoding progress bar work on Windows servers? =
 
 Because I can't figure out how to do it. Windows works a little differently from Linux, and I don't understand it enough to get it to work.
 
@@ -101,7 +101,7 @@ Because I can't figure out how to do it. Windows works a little differently from
 
 == Changelog ==
 
-= 2.0 - February 20, 2012=
+= 2.0 - February 20, 2012 =
 * Large rewrite to fix several security issues. Full server paths are no longer exposed in the Media Upload form, all AJAX calls are handled through wp_ajax, and nonces are checked.
 * Video encoding shows progress bar on Linux servers.
 * Ability to cancel encoding added.
@@ -109,6 +109,7 @@ Because I can't figure out how to do it. Windows works a little differently from
 * Videos recorded on phones in portrait mode (tall and skinny) will not end up sideways if FFMPEG version .10 or later is installed.
 * Thumbnail generation process uses fancy jQuery animation.
 * Better check for FFMPEG. Should actually work in Windows now.
+* Fixed unenclosed generate, embed, submit, delete strings in kg_call_ffmpeg
 
 = 1.1 - January 8, 2012 =
 * Includes Strobe Media Playback files so Flash Player is now hosted locally, which allows skinning.
