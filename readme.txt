@@ -3,8 +3,8 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation/
 Tags: video, video gallery, html5, shortcode, thumbnail, ffmpeg, libav, embed, mobile, webm, ogg, h.264
 Requires at least: 3.5
-Tested up to: 3.5
-Stable tag: 3.0
+Tested up to: 3.5.1
+Stable tag: 3.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -126,7 +126,16 @@ Use the "Embed from URL" tab. Use the format http://username:password@yourdomain
 
 == Changelog ==
 
-= 3.0 - January 23, 2012 =
+= 3.0.2 - January 24, 2013 =
+* Fixed bug that permanently disabled buttons on the Embed Video from URL tab.
+* Disabled "Delete Permanently" option for encoded files found on other servers.
+* Reduced the jQuery UI Dialog css and put it in its own scope to avoid conflicts with existing jQuery UI Dialog themes. 
+* Cleaned out some leftover code.
+
+= 3.0.1 - January 24, 2013 =
+* Fixed bug that inserted empty options into gallery shortcodes.
+
+= 3.0 - January 23, 2013 =
 * Updated to provide compatibility with several media changes in WordPress 3.5. With this version, thumbnail generating & video encoding will only work in WordPress 3.5 and above.
 * Added popup video gallery.
 * Changed shortcode tag to [KGVID]. Retained [FMP] for backwards compatibility.
