@@ -126,13 +126,16 @@ Use the "Embed from URL" tab. Use the format http://username:password@yourdomain
 
 == Changelog ==
 
+= 3.0.4 - January 29, 2013 =
+* Disabled "Delete Permanently" link while encoding is being canceled.
+
 = 3.0.3 - January 29, 2013 =
 * Fixed bug that added a blank line to JavaScript embedded in the page if "volume" wasn't set in the short code (Video.js only).
 * If video player is set larger than the containing DIV and the player size is reduced to fit, the height is now rounded to the nearest integer.
 
 = 3.0.2 - January 24, 2013 =
 * Fixed bug that permanently disabled buttons on the Embed Video from URL tab.
-* Disabled "Delete Permanently" option for encoded files found on other servers.
+* Disabled "Delete Permanently" link for encoded files found on other servers.
 * Reduced the jQuery UI Dialog css and put it in its own scope to avoid conflicts with existing jQuery UI Dialog themes. 
 * Cleaned out some leftover code.
 
