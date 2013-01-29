@@ -536,7 +536,6 @@ function KGVID_shortcode($atts, $content = ''){
 		}
 
 		$code .= "<div id=\"video_".$div_suffix."_div\" class=\"kgvid_videodiv\">";
-		if ( $options['embed_method'] == "Video.js"  ) { $code .= "<div class='kgvid_watermark'><img src='http://www.kylegilman.net/dev/wp-content/uploads/2013/01/Camera-Noise-Logo-Transparent.png'></div>"; } //&& !empty($options['watermark'])
 		$code .= "<video id=\"video_".$div_suffix."\" ";
 		if ($query_atts["loop"] == 'true') { $code .= "loop " ;}
 		if ($query_atts["autoplay"] == 'true') { $code .= "autoplay " ;}
