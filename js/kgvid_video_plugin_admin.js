@@ -159,23 +159,20 @@ function kgvid_hide_standard_wordpress_display_settings(postID) {
 
 function kgvid_set_singleurl() {
 
-	var url = document.getElementById('attachments-singleurl-kgflashmediaplayer-url').value;
 	var oldbasename = jQuery('#kgflashmediaplayer-table').data("kgvid_attachment_id") || "singleurl";
-	
+	var url = document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-url').value;
 	var validExtensions = new Array(".flv", ".f4v", ".mp4", ".mov", ".m4v", ".webm", ".ogg", ".ogv");
 	var extensionExists = false;
 	for (var i = 0; i < validExtensions.length; i++) {
 		if (url.indexOf(validExtensions[i]) != -1) { 
 			extensionExists = true;
-			if ( document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-ffmpegexists').value === "true" ) {
+			if ( document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-ffmpegexists').value == "on" ) {
 				document.getElementById('attachments-'+oldbasename+'-thumbgenerate').disabled = false;
 				document.getElementById('attachments-'+oldbasename+'-thumbgenerate').title = "";
 				document.getElementById('attachments-'+oldbasename+'-thumbrandomize').disabled = false;
 				document.getElementById('attachments-'+oldbasename+'-thumbrandomize').title = "";
 				document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-encode').disabled = false;
 				document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-encode').title = "";
-				document.getElementById('insertonlybutton').disabled = false;
-				document.getElementById('insertonlybutton').title = "";
 				var basename = "singleurl_"+url.replace(/^.*\/|\.[^.]*$/g, '');
 				//jQuery('#kgflashmediaplayer-table :input').each(function(){ 
 				jQuery('#kgvid-form :input').each(function(){ 
@@ -190,8 +187,14 @@ function kgvid_set_singleurl() {
 				document.getElementById('attachments-'+oldbasename+'-kgflashmediaplayer-encodeboxes').id = 'attachments-'+basename+'-kgflashmediaplayer-encodeboxes';
 				document.getElementById('attachments-'+oldbasename+'-thumbnailplaceholder').id = 'attachments-'+basename+'-thumbnailplaceholder';
 				jQuery('#attachments-'+basename+'-thumbgenerate').replaceWith('<input type="button" id="attachments-'+basename+'-thumbgenerate" class="button-secondary" value="Generate" name="thumbgenerate" onclick="kgvid_generate_thumb(\''+basename+'\', \'generate\');" >');
-				jQuery('#attachments-'+basename+'-thumbrandomize').replaceWith('<input type="button" id="attachments-'+basename+'-thumbgenerate" class="button-secondary" value="Randomize" name="thumbgenerate" onclick="kgvid_generate_thumb(\''+basename+'\', \'random\');" >');
+				jQuery('#attachments-'+basename+'-thumbrandomize').replaceWith('<input type="button" id="attachments-'+basename+'-thumbrandomize" class="button-secondary" value="Randomize" name="thumbgenerate" onclick="kgvid_generate_thumb(\''+basename+'\', \'random\');" >');
 			}
+			else {
+				document.getElementById('attachments-'+oldbasename+'-thumbgenerate').title = "FFMPEG not found";
+				document.getElementById('attachments-'+oldbasename+'-thumbrandomize').title = "FFMPEG not found";
+			}
+			document.getElementById('insertonlybutton').disabled = false;
+			document.getElementById('insertonlybutton').title = "";
 			break;
 		}
 	}
@@ -207,7 +210,6 @@ function kgvid_set_singleurl() {
 		document.getElementById('insertonlybutton').title = "Please enter a valid video URL";
 		basename = "singleurl";
 	}
-	//console.log(basename);
 	kgvid_redraw_encode_checkboxes(url, basename, 'attachment');
 }
 
@@ -356,11 +358,13 @@ function kgvid_encode_queue(action, order) {
 function kgvid_hide_plugin_settings(selected_option) {
 	if (selected_option == "Video.js") {
 		jQuery("table:contains(End of video image)").hide();
+		jQuery("tr:contains(Watermark)").show();
 		jQuery("h3:contains(The following options will only affect Flash playback)").hide();
 		jQuery("tr:contains(Skin Class)").show();
 	}
 	if (selected_option == "Strobe Media Playback") {
 		jQuery("table:contains(End of video image)").show();
+		jQuery("tr:contains(Watermark)").hide();
 		jQuery("h3:contains(The following options will only affect Flash playback)").show();
 		jQuery("tr:contains(Skin Class)").hide();
 	}
