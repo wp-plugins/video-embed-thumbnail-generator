@@ -126,12 +126,6 @@ Use the "Embed from URL" tab. Use the format http://username:password@yourdomain
 
 == Changelog ==
 
-= 3.0.4 - January 29, 2013 =
-* Added option to choose -b:v or legacy -b flags when encoding. Newer FFMPEG versions only accept -b:v.
-* Added automatic encode queue cleanup. Any completed entry older than a week will be removed.
-* Disabled "Delete Permanently" link while encoding is canceling.
-* Checked for escapeshellcmd. If it's disabled on the server, encoding won't start.
-
 = 3.0.3 - January 29, 2013 =
 * Fixed bug that added a blank line to JavaScript embedded in the page if "volume" wasn't set in the short code (Video.js only).
 * If video player is set larger than the containing DIV and the player size is reduced to fit, the height is now rounded to the nearest integer.
