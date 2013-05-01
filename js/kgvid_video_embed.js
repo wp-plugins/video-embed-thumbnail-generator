@@ -22,7 +22,6 @@ function kgvid_setup_video(id, player_type, set_volume) {
 }
 
 function kgvid_ios_player(id) {
-	//var source = document.getElementById('video_'+id+'_html5_api').src;
 	var player = _V_('video_'+id);
 	var source = document.getElementById('video_'+id+'_html5_api').src
 	var poster = player.options.poster;
@@ -35,16 +34,20 @@ function kgvid_ios_player(id) {
 		if ( poster != null ) { ios_video += ' poster="'+poster+'" '; }
 		ios_video += '\><source src="'+source+'" type="video/mp4" /></video>';
 	}
-	else { var ios_video = '<div id="video_'+id+'" style="background-color:black;"><div class="kgvid_ios_novideo"></div>';
+	else { 
+		var ios_video = '<div id="video_'+id+'" style="background-color:black;"><div class="kgvid_ios_novideo"></div>';
 		if ( poster != null ) { ios_video += '<img class="kgvid_ios_novideo" src="'+poster+'">'; }
-		ios_video += '</div>'; 
+		ios_video += '</div>';
 	}
 	jQuery(player.el).remove();
+	console.log(ios_video);
 	jQuery('#video_'+id+'_div').prepend(ios_video);
 	if ( source != "" ) { document.getElementById('video_'+id).load(); }
 }
 
 function kgvid_resize_video(id, player_type, set_width, set_height) {
+	var iOS = ( navigator.userAgent.match(/(iPad|iPhone|iPod)/i) ? true : false );
+	if ( iOS ) { player_type = "iOS"; }
 	var aspect_ratio = Math.round(set_height/set_width*1000)/1000
 	var parent_width = jQuery('#kgvid_'+id+'_wrapper').parent().width();
 	if ( parent_width < set_width ) { set_width = parent_width; }
@@ -81,22 +84,19 @@ function kgvid_resize_video(id, player_type, set_width, set_height) {
 	jQuery('#video_'+id+'_caption').width(set_width-width_remove); //wraps long captions
 }
 
-function kgvid_video_counter(id, plays, ends, event, title) {
+function kgvid_video_counter(id, event, countable, title) {
 	var changed = false;	
 	
 	var played = jQuery('#video_'+id+'_div').data("played") || "not played";
 	if ( played == "not played" ) { 
-		if (plays != "not_countable" ) { //video is in the db
-			plays++; 
+		if (countable) { //video is in the db
 			changed = true; 
 			jQuery('#video_'+id+'_div').data("played", "played");
 		}
 		if (typeof _gaq != "undefined") { _gaq.push(["_trackEvent", "Videos", "Play Start", title]); }
 	}
 	if ( event == "end" ) {
-		if (ends != "not_countable" ) { //video is in the db 
-			plays++;
-			ends++;
+		if (countable) { //video is in the db 
 			changed = true; 
 		}
 		if (typeof _gaq != 'undefined') { _gaq.push(['_trackEvent', 'Videos', 'Complete View', title]); }
@@ -105,10 +105,9 @@ function kgvid_video_counter(id, plays, ends, event, title) {
 		jQuery.post(ajax_object.ajaxurl, {
 			action: 'kgvid_count_play',
 			post_id: id,
-			video_plays: plays,
-			complete_views: ends
+			video_event: event
 		}, function(data) {
-			jQuery('#video_'+id+'_viewcount').html(plays+' views');
+			jQuery('#video_'+id+'_viewcount').html(data+' views');
 		});
 	}	
 }
