@@ -124,10 +124,10 @@ function kgvid_setup_video(id) {
 		);
 	} //end if Strobe Media Playback
 
-	if ( video_vars.resize == "true" ) {	
-		kgvid_resize_video(id);
-		window.addEventListener('resize', kgvid_resize_all_videos, false);
-	}
+	
+	kgvid_resize_video(id);
+	window.addEventListener('resize', kgvid_resize_all_videos, false);
+
 }
 
 function kgvid_resize_all_videos() {
