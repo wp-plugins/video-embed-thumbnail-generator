@@ -8,7 +8,7 @@ function kgvid_SetVideo(suffix, site_url, id, width, height, meta) {
 	}
 	var iframe_height = height;
 	if ( meta > 0 ) { iframe_height = parseInt(height)+Math.round(20*meta); }
-	console.log(iframe_height+" "+meta);
+
 	jQuery('#kgvid_GalleryPlayerDiv_'+suffix).html('<iframe id="kgvid_GalleryVideo_'+id+'" src="'+site_url+'?attachment_id='+id+'&kgvid_video_embed[enable]=true&kgvid_video_embed[gallery]=true&kgvid_video_embed[width]='+width+'&kgvid_video_embed[height]='+height+'" scrolling="no" width="'+width+'" height="'+iframe_height+'" frameborder="0" webkitallowfullscreen="" allowfullscreen=""></iframe>');
 	jQuery('#kgvid_GalleryPlayerDiv_'+suffix).dialog("option", "width", parseInt(width)+6);
 	jQuery('#kgvid_GalleryPlayerDiv_'+suffix).dialog('open');
@@ -123,20 +123,6 @@ function kgvid_setup_video(id) {
 			}
 		);
 	} //end if Strobe Media Playback
-	
-	if ( video_vars.player_type == "WordPress Default" ) {
-		
-		if ( video_vars.autoplay == "true" ) { jQuery('#video_'+id+'_meta').removeClass('kgvid_video_meta_hover'); }
-		jQuery('#video_'+id+'_div').hover(
-			function(){ 
-				jQuery('#video_'+id+'_meta').addClass('kgvid_video_meta_hover'); 
-
-			},
-			function(){ 
-				jQuery('#video_'+id+'_meta').removeClass('kgvid_video_meta_hover');		
-			}
-		);
-	} //end if Strobe Media Playback
 
 	kgvid_resize_video(id);
 	window.addEventListener('resize', kgvid_resize_all_videos, false);
@@ -189,9 +175,6 @@ function kgvid_resize_video(id) {
 		if ( video_vars.player_type == "iOS" ) {
 			jQuery('#video_'+id).attr('width',set_width).attr('height',set_height);
 			jQuery('#video_'+id).width(set_width).height(set_height);
-			
-			jQuery('#kgvid_'+id+'_wrapper').find('.wp-video-shortcode').attr('width',set_width).attr('height',set_height);
-			jQuery('#kgvid_'+id+'_wrapper').find('.wp-video-shortcode').width(set_width).height(set_height);
 		}
 
 	}
