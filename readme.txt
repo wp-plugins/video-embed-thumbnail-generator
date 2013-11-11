@@ -155,7 +155,7 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 
 == Changelog ==
 
-= 4.2.7 - October 22, 2013 =
+= 4.2.7 - October 24, 2013 =
 * Fixed several video sizing issues.
 * Updated Video.js to version 4.2.2.
 * No longer loading Video.js files when using the WordPress Default player.
