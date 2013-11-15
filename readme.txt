@@ -3,8 +3,8 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4
 Requires at least: 3.5
-Tested up to: 3.7
-Stable tag: 4.2.6
+Tested up to: 3.8
+Stable tag: 4.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,7 +53,7 @@ To embed videos on other sites you can use code like this.
 `[KGVID poster="http://www.kylegilman.net/wp-content/uploads/2011/10/Reel-11-10-10-web_thumb2.jpg"
 width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Reel-2012-05-15-720.mp4[/KGVID]`
 
-= If you want to further modify the way the video player works, you can add the following options inside the [KGVID] tag. These will override anything you've set in the plugin settings or attachment details. =
+= If you want to further modify the way the video player works, you can add the following options inside the `[KGVID]` tag. These will override anything you've set in the plugin settings or attachment details. =
 
 * `id="xxx"` video attachment ID (instead of using a URL).
 * `videos="x"` number of attached videos to display if no URL or id is given.
@@ -154,6 +154,27 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.2.9 - November 15, 2013 =
+* Fixed bug that interfered with database queries that do not have post_meta (The Events Calendar revealed the bug, but it likely had an effect on other plugins).
+* Fixed bug that assigned auto-encoded videos to nobody.
+* Restored process to set featured image for video attachments when thumbnails are assigned.
+
+= 4.2.8 - November 11, 2013 =
+* Updated Video.js to version 4.3.0.
+* Fixed iframe embedded video auto-sizing bug.
+* Improved sizing of videos using the WordPress Default player.
+* Removed shortcode text from RSS feeds.
+* Now checking for cross-origin when making thumbnails. If video files are hosted on a different domain FFMPEG will make thumbnails to avoid cross-origin errors when saving canvas elements.
+* Fixed bug that assigned auto-generated thumbnails to nobody.
+* Fixed bug that would cause divide by zero errors when generating thumbnails from .mpg videos that had already encoded an alternate format with FFMPEG.
+
+= 4.2.7 - October 24, 2013 =
+* Fixed several video sizing issues.
+* Updated Video.js to version 4.2.2.
+* No longer loading Video.js files when using the WordPress Default player.
+* Restored [/KGVID] closing tag to inserted gallery shortcodes to avoid confusion if more than one [KGVID] is in the post.
+* Changed Settings and Donate links on Installed Plugins admin page and fixed 404 error on network dashboards.
 
 = 4.2.6 - October 19, 2013 =
 * Fixed bug that broke playback in some cases when using the shortcode without a URL.
