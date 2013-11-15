@@ -3,7 +3,7 @@
 Plugin Name: Video Embed & Thumbnail Generator
 Plugin URI: http://www.kylegilman.net/2011/01/18/video-embed-thumbnail-generator-wordpress-plugin/
 Description: Generates thumbnails, HTML5-compliant videos, and embed codes for locally hosted videos. Requires FFMPEG or LIBAV for encoding.
-Version: 4.2.8
+Version: 4.2.9
 Author: Kyle Gilman
 Author URI: http://www.kylegilman.net/
 
@@ -47,7 +47,7 @@ function kgvid_default_options_fn() {
 	$upload_capable = kgvid_upload_capable();
 
 	$options = array(
-		"version"=>4.28,
+		"version"=>4.29,
 		"embed_method"=>"Video.js",
 		"template"=>false,
 		"template_gentle"=>"on",
@@ -812,8 +812,8 @@ function kgvid_video_embed_enqueue_scripts() {
 
 	//Video.js script and skins
 	if ( $options['embed_method'] != "WordPress Default" ) {
-		wp_enqueue_script( 'video-js', plugins_url("", __FILE__).'/video-js/video.js', '', '4.2.2' );
-		wp_enqueue_style( 'video-js-css', plugins_url("", __FILE__).'/video-js/video-js.css', '', '4.2.2' );
+		wp_enqueue_script( 'video-js', plugins_url("", __FILE__).'/video-js/video.js', '', '4.3.0' );
+		wp_enqueue_style( 'video-js-css', plugins_url("", __FILE__).'/video-js/video-js.css', '', '4.3.0' );
 		wp_enqueue_style( 'video-js-kg-skin', plugins_url("", __FILE__).'/video-js/kg-video-js-skin.css', '', $options['version'] );
 	}
 
@@ -853,7 +853,7 @@ function kgvid_video_embed_print_scripts() {
 	$options = get_option('kgvid_video_embed_options');
 
 	if ( $options['embed_method'] != "WordPress Default" ) {
-		echo '<script type="text/javascript">videojs.options.flash.swf = "'.plugins_url("", __FILE__).'/video-js/video-js.swf?4.2.2"</script>'."\n";
+		echo '<script type="text/javascript">videojs.options.flash.swf = "'.plugins_url("", __FILE__).'/video-js/video-js.swf?4.0.0"</script>'."\n";
 	}
 
 	foreach ( $posts as $post ) {
@@ -2839,9 +2839,11 @@ add_filter("attachment_fields_to_edit", "kgvid_image_attachment_fields_to_edit",
 function kgvid_hide_video_children($wp_query_obj) {
 
 	if ( is_admin()
+		&& is_array($wp_query_obj->query_vars)
+		&& ( array_key_exists('post_type', $wp_query_obj->query_vars) && $wp_query_obj->query_vars['post_type'] == 'attachment' ) //only deal with attachments
 		&& !array_key_exists('post_mime_type', $wp_query_obj->query_vars) //show children when specifically displaying videos
-		&& array_key_exists('posts_per_page', $wp_query_obj->query_vars)
-		&& $wp_query_obj->query_vars['posts_per_page'] > 0 ) { //hide children only when showing paged content (makes sure that -1 will actually return all attachments)
+		&& ( array_key_exists('posts_per_page', $wp_query_obj->query_vars) && $wp_query_obj->query_vars['posts_per_page'] > 0 ) //hide children only when showing paged content (makes sure that -1 will actually return all attachments)
+	) {
 		$wp_query_obj->set(
 			'meta_query',
 			array(
@@ -2852,7 +2854,7 @@ function kgvid_hide_video_children($wp_query_obj) {
 			)
 		);
 
-	}
+	}//end if
 
 }
 add_action('pre_get_posts','kgvid_hide_video_children');
@@ -3128,6 +3130,7 @@ function kgvid_video_attachment_fields_to_save($post, $attachment) {
 		if( isset($attachment['kgflashmediaplayer-featured']) ) {
 			update_post_meta($post['ID'], '_kgflashmediaplayer-featured', $attachment['kgflashmediaplayer-featured']);
 			if ( !empty($thumb_id) ) {
+
 				if ( isset($_POST['action']) && $_POST['action'] == 'save-attachment-compat' && isset($_POST['post_id']) ) { //if this is in the media modal
 					$post_parent = $_POST['post_id'];
 				}
@@ -3138,6 +3141,8 @@ function kgvid_video_attachment_fields_to_save($post, $attachment) {
 				if ( isset($post_parent) ) {
 					set_post_thumbnail($post_parent, $thumb_id);
 				}
+
+				set_post_thumbnail($post['ID'], $thumb_id); //set the video's featured image as well as the post's featured image
 			}
 		}
 		else { update_post_meta($post['ID'], '_kgflashmediaplayer-featured', "notchecked"); }
@@ -4152,19 +4157,28 @@ function kgvid_encode_progress($video_key, $format, $page) {
 							}
 
 							global $wpdb;
+							global $user_ID;
 							$query = "SELECT ID FROM {$wpdb->posts} WHERE guid='".$video_embed_queue[$video_key]['encode_formats'][$format]['url']."'"; //check for existing entry in the db
 							$video_id = $wpdb->get_var($query);
 							if ( !$video_id ) {
 								$wp_filetype = wp_check_filetype(basename($video_entry['encode_formats'][$format]['filepath']), null );
 								$video_formats = kgvid_video_formats();
 								$title .= " ".$video_formats[$format]['name'];
+
+								if ( $user_ID == 0 ) {
+									$parent_post = get_post($parent_id);
+									$user_ID = $parent_post->post_author;
+								}
+
 								$attachment = array(
 								   'guid' => $video_entry['encode_formats'][$format]['url'],
 								   'post_mime_type' => $wp_filetype['type'],
 								   'post_title' => $title,
 								   'post_content' => '',
-								   'post_status' => 'inherit'
+								   'post_status' => 'inherit',
+								   'post_author' => $user_ID
 								);
+
 								$new_id = wp_insert_attachment( $attachment, $video_entry['encode_formats'][$format]['filepath'], $parent_id );
 								// you must first include the image.php file
 								// for the function wp_generate_attachment_metadata() to work and media.php for wp_read_video_metadata() in WP 3.6+
