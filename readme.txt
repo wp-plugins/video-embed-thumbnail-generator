@@ -3,7 +3,7 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4
 Requires at least: 3.5
-Tested up to: 3.8
+Tested up to: 3.9
 Stable tag: 4.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -27,6 +27,8 @@ If you know which frame you want to use, click "Choose from video..." to select 
 After you select a thumbnail it will be registered in the Wordpress Media Library and added to the video's attachments. Unused thumbnails will be deleted.
 
 In the plugin settings you can set the default maximum width and height based on the dimensions of your particular template and those values will be filled in when you open the window. If you generate thumbnails, the video display dimensions will be adjusted automatically to match the size and aspect ratio of the video file. You can make further adjustments if you want.
+
+You can add subtitle and caption tracks by choosing properly formatted WebVTT files from the media library or entering a URL directly. Enter the two-letter language code and the label text that will be shown to users. Currently the Video.js and WordPress default players do not work with the "default" attribute but I will add the option to turn a text track on by default if that changes in the future. The WordPress default player does not differentiate between captions and subtitles, but Video.js will show a different icon depending on the selection.
 
 I highly recommend starting with H.264 video and AAC audio in an MP4 container. If you're encoding with Handbrake, make sure that "Web Optimized" is checked. Using Apple's Compressor, the "Streaming" setting should be "Fast Start" (not Fast Start - Compressed Header). I've written up my recommended video encode settings in <a href="http://www.kylegilman.net/2011/02/25/making-mp4-h-264-videos-in-apple-compressor/">a post on my website</a>.
 
@@ -56,7 +58,9 @@ width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Re
 = If you want to further modify the way the video player works, you can add the following options inside the `[KGVID]` tag. These will override anything you've set in the plugin settings or attachment details. =
 
 * `id="xxx"` video attachment ID (instead of using a URL).
-* `videos="x"` number of attached videos to display if no URL or id is given.
+* `videos="x"` number of attached videos to display if no URL or ID is given.
+* `orderby="menu_order/title/post_date/rand/ID"` criteria for sorting attached videos if no URL or ID is given.
+* `order="ASC/DESC"` sort order.
 * `poster="http://www.example.com/image.jpg"` sets the thumbnail.
 * `endofvideooverlay="http://www.example.com/end_image.jpg` sets the image shown when the video ends.
 * `width="xxx"`
@@ -71,11 +75,18 @@ width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Re
 * `title="Video Title"` or `"false"` to disable.
 * `embedcode="html code"` changes text displayed in the embed code overlay in order to provide a custom method for embedding a video or `"false"` to disable.
 * `view_count="true/false"` turns the view count on or off.
-* `caption="Caption"`
+* `caption="Caption"` text that is displayed below the video (not subtitles or closed captioning)
 * `description="Description"` Used for metadata only.
 * `downloadlink="true/false"` generates a link below the video to make it easier for users to save the video file to their computers.
 * `right_click="true/false"` allow or disable right-clicking on the video player.
 * `resize="true/false"` allow or disable responsive resizing.
+
+= These options will add a subtitle/caption track =
+
+* `track_src="http://www.example.com/subtitles.vtt_.txt"` URL of the WebVTT file.
+* `track_kind=subtitles/captions/chapters`
+* `track_srclang=xx` the track's two-character language code (en, fr, es, etc)
+* `track_label="Track Label"` text that will be shown to the user when selecting the track.
 
 = These options will only affect Video.js playback =
 
@@ -97,9 +108,10 @@ width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Re
 * `gallery_thumb="xxx"` width in pixels to display gallery thumbnails
 * `gallery_exclude="15"` comma separated video attachment IDs. Excludes the videos from the gallery.
 * `gallery_include="65"` comma separated video attachment IDs. Includes only these videos in the gallery. Please note that include and exclude cannot be used together.
-* `gallery_orderby="menu_order/title/post_date/rand/ID"` criteria for sorting the gallery
-* `gallery_order="ASC/DESC"` sort order
-* `gallery_id="241"` post ID to display a gallery made up of videos associated with a different post
+* `gallery_orderby="menu_order/title/post_date/rand/ID"` criteria for sorting the gallery.
+* `gallery_order="ASC/DESC"` sort order.
+* `gallery_id="241"` post ID to display a gallery made up of videos associated with a different post.
+* `gallery_end="close/next"` either close the pop-up or start playing the next video when the current video finishes playing.
 
 I'm not really a software developer. I'm just a film editor with some time on his hands who wanted to post video for clients and wasn't happy with the current state of any available software. But I want to really make this thing work, so please help me out by posting your feedback on <a href="https://github.com/kylegilman/video-embed-thumbnail-generator/issues?state=open">Github</a>.
 
@@ -154,6 +166,39 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.3 - March XX, 2014 =
+* Prepared plugin for internationalization. Translators needed!
+* Finally paying attention to multisite. Several FFMPEG settings and the encode queue are now controlled at the network level if the plugin is network activated.
+* Added JW Player option if the JW Player WordPress plugin is active.
+* Added video subtitle/captions support.
+* Revised and simplified video gallery popup method. Switched to lighter SimpleModal plugin and no longer loading jQuery-ui libraries.
+* Added "gallery_ended" shortcode attribute to set an action when a pop-up video gallery video ends.
+* Added next and previous buttons to navigate between pop-up video gallery items.
+* Updated Video.js to version 4.4.3
+* Strobe Media Playback is now deprecated. New features added to the plugin might not work if this player is selected.
+* Added option to add a watermark to videos encoded with FFMPEG/LIBAV.
+* Added option to automatically generate multiple thumbnails when a video is uploaded.
+* Added option to encode more than one video at the same time.
+* Added list of shortcode attribute options to the post edit help tab.
+* Added "order" and "orderby" shortcode attributes to sort videos embedded without a URL or ID specified.
+* Added option to turn on video download link by default.
+* Added option to set video preload attribute.
+* Added float to inline videos to allow text to wrap around them.
+* Added play button overlay to gallery thumbnails when using WordPress Default player.
+* Applied video alignment setting to video galleries.
+* Now only loading plugin-related JavaScripts when the shortcode is used on the page and moved links to the footer to speed up page loading.
+* Added wpdb->prepare to all database queries for increased security.
+* Added nonce check when recording video play counts for increased security.
+* Fixed bug that broke responsive resizing in IE 8 and for all videos with apostrophes in their titles.
+* Fixed bug that disabled FFMPEG if the path to WordPress had spaces in it.
+* Fixed bug that generated an error if the exec function was disabled on the server using suhosin or safe mode.
+* Fixed bug that caused video encode problems when FFMPEG output contained special characters.
+* Fixed bug that generated misaligned play button arrows in some themes when using the Video.js player.
+* Fixed bug that sometimes generated jagged rows in galleries with mixed aspect ratios.
+* Fixed bug that attempted to generate thumbnails using FFMPEG if a user had previously installed FFMPEG, disabled in-browser thumbnails, then disabled FFMPEG.
+* Fixed several user capability related bugs related to users who were not assigned any roles and capabilities that were not assigned to any roles.
+* Changed video title overlay z-index to 103 to avoid floating over other elements.
 
 = 4.2.9 - November 15, 2013 =
 * Fixed bug that interfered with database queries that do not have post_meta (The Events Calendar revealed the bug, but it likely had an effect on other plugins).
