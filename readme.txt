@@ -1,10 +1,10 @@
 === Video Embed & Thumbnail Generator ===
 Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
-Tags: video, video player, video gallery, html5, shortcode, thumbnail, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4
+Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
-Tested up to: 3.7
-Stable tag: 4.2.6
+Tested up to: 3.8.2
+Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,33 +12,46 @@ Generates thumbnails, encodes HTML5-compliant videos, and embeds locally hosted 
 
 == Description ==
 
-= A plugin to make embedding videos, generating thumbnails, and encoding HTML5-compliant files a little bit easier. =
+= A plugin to make embedding videos, generating thumbnails, and encoding HTML5-compatible files a little bit easier. =
 
-The plugin adds several fields to any video uploaded to the WordPress Media Library. Just choose a few options and click "Insert into Post" and you'll get a shortcode in the post editor that will embed a flexible, responsive HTML5 video player with Flash fallback for unsupported browsers, and a preview image.
+This plugin adds several fields to any video uploaded to the WordPress Media Library. Just choose a few options, make thumbnails, click "Insert into Post" and you'll get a shortcode in the post editor that will embed a flexible, responsive HTML5 video player with Flash fallback for unsupported browsers.
 
-You have the option to use either the lightweight, flexible Video.js HTML5 player, the WordPress default player (introduced in WordPress version 3.6), or Adobe's Strobe Media Playback Flash player. The Video.js player is styled the same in all desktop browsers and is easily customizable. The Strobe Media Playback option is not recommended. It will default to a Flash video player if you're using a Flash-compatible file (flv, f4v, mp4, mov, or m4v). Otherwise it will use the Video.js player as a fallback. No matter which player you use, the video will resize on the fly to fit the container it's in.
+You have the option to use a few different video players:
 
-You can also use the plugin to create a popup video gallery. The shortcode uses options similar to the WordPress image gallery shortcode. In its simplest form use the code `[KGVID gallery="true"]` to create a gallery of all videos attached to the post. Thumbnail size and video popup size can be set on the plugin settings page or in the shortcode using the options listed below.
+* Video.js
+* The WordPress default player using MediaElement.js, which was introduced in WordPress version 3.6
+* JW Player (if <a href="http://wordpress.org/plugins/jw-player-plugin-for-wordpress/">their plugin</a> is installed)
+* Adobe's Strobe Media Playback Flash player.
 
-If your video can be played natively in your browser, or if you have FFMPEG or LIBAV installed on your server, you can generate thumbnails from your video. Using either the "Generate" or "Randomize" buttons will create an array to choose from. The "Generate" button will always generate thumbnails from the same frames of your video, evenly spaced. If you don't like them, you can randomize the results with the "Randomize" button. If you want to see the first frame of the video, check the "Force 1st Frame Thumbnail" button. After creating an array of thumbnails you can save them all using the "Save all thumbnails" button.
+<em>The Strobe Media Playback option hasn't been updated since 2011 and is not recommended, but I'm keeping it around for longtime users of this plugin who don't want to change. Most features of the plugin will work when using Strobe Media Playback, but new features will not be tested with it. Selecting Strobe Media Playback will default to a Flash video player if you're using a Flash-compatible file (flv, f4v, mp4, mov, or m4v). Otherwise it will use the Video.js player as a fallback.</em>
 
-If you know which frame you want to use, click "Choose from video..." to select it from the video. This will only work for videos that can be played natively in your browser. If you want really fine control you can enter timecode in the "Thumbnail timecode" field. Use `mm:ss` format. You can use decimals to approximate frames. For example, `23.5` will generate a thumbnail halfway between the 23rd and 24th seconds in the video. `02:23.25` would be one quarter of the way between the 143rd and 144th seconds. You can generate as many or as few as you need (up to 99 at a time).
+No matter which player you use, the video will resize on the fly to fit the container it's in. There is no need to use FitVids.js and in fact FitVids.js will break responsive resizing for some players if it's running on your site.
+
+You can also use the plugin to create a popup video gallery. The shortcode uses options similar to the WordPress image gallery shortcode. In its simplest form use the code `[KGVID gallery="true"]` to create a gallery of all videos attached to the post. Thumbnail size and video popup size can be set on the plugin settings page or in the shortcode.
+
+If your video can be <a href="http://en.wikipedia.org/wiki/HTML5_video#Browser_support">played natively in your browser</a>, or if you have FFMPEG or LIBAV installed on your server, you can generate thumbnails from your video. Using either the "Generate" or "Randomize" buttons will create an array to choose from. The "Generate" button will always generate thumbnails from the same frames of your video, evenly spaced. If you don't like them, you can randomize the results with the "Randomize" button. If you want to see the first frame of the video, check the "Force 1st Frame Thumbnail" button. After creating an array of thumbnails you can save them all using the "Save all thumbnails" button.
+
+If you know which frame you want to use for your thumbnail, click "Choose from video..." to select it from the video. This will only work for <a href="http://en.wikipedia.org/wiki/HTML5_video#Browser_support">videos that can be played natively in your browser</a>. If you want really fine control you can enter timecode in the "Thumbnail timecode" field. Use `mm:ss` format. Use decimals to approximate frames. For example, `23.5` will generate a thumbnail halfway between the 23rd and 24th seconds in the video. `02:23.25` would be one quarter of the way between the 143rd and 144th seconds. You can generate as many or as few as you need (up to 99 at a time).
 
 After you select a thumbnail it will be registered in the Wordpress Media Library and added to the video's attachments. Unused thumbnails will be deleted.
 
 In the plugin settings you can set the default maximum width and height based on the dimensions of your particular template and those values will be filled in when you open the window. If you generate thumbnails, the video display dimensions will be adjusted automatically to match the size and aspect ratio of the video file. You can make further adjustments if you want.
 
-I highly recommend starting with H.264 video and AAC audio in an MP4 container. If you're encoding with Handbrake, make sure that "Web Optimized" is checked. Using Apple's Compressor, the "Streaming" setting should be "Fast Start" (not Fast Start - Compressed Header). I've written up my recommended video encode settings in <a href="http://www.kylegilman.net/2011/02/25/making-mp4-h-264-videos-in-apple-compressor/">a post on my website</a>.
+You can add subtitle and caption tracks by choosing properly formatted WebVTT files from the media library or entering a URL directly. Enter the two-letter language code and the label text that will be shown to users. Currently the Video.js and WordPress default players do not work with the "default" attribute but I will add the option to turn a text track on by default if that changes in the future. The WordPress default player does not differentiate between captions and subtitles, but Video.js will show a different icon depending on the selection.
 
-The plugin can use FFMPEG or LIBAV to encode videos and make thumbnails if you have them installed on your server. By default the plugin looks for FFMPEG in `/usr/local/bin` but if the application is installed in a different place on your server, you can point it to the correct place in the plugin settings. Users running WordPress on Windows servers should try using Linux-style paths (with forward slashes instead of backslashes and a forward slash `/` instead of `C:\`).
+I highly recommend using <a href="http://handbrake.fr/">Handbrake</a> to make a file with H.264 video and AAC audio in an MP4 container. If you're encoding with Handbrake make sure that "Web Optimized" is checked. Using Apple's Compressor, the "Streaming" setting should be "Fast Start" (not Fast Start - Compressed Header).
 
-If you have the proper libraries installed, you can choose to replace your uploaded video with an H.264 file of the same resolution, and generate as many as five additional formats depending on your original source. 1080p, 720p, or up to 480p H.264, WEBM, and OGV. Different browsers have different playback capabilities. Most desktop browsers can play H.264, and all modern mobile devices can play at least 480p H.264. If you create multiple H.264 resolutions, the highest resolution supported by the device will be served up automatically. The plugin will not upconvert your video, so if you upload a 720p video, it will not waste your time creating a 1080p version. There was a time when it seemed like a good idea to provide OGV or WEBM for some desktop browsers, but Firefox supports H.264 playback in Windows now and will soon support it in Mac & Linux. I no longer recommend encoding OGV or WEBM unless you expect a large number of no-Flash sticklers visiting your site. However, your mileage may vary.
+The plugin can use FFMPEG or LIBAV to encode videos and make thumbnails if you have one of them installed on your server. You can even choose to generate thumbnails and alternate video formats automatically whenever a new video is uploaded to the database.
 
-The files will encode in the background and will take several minutes to complete, depending on your server setup and the length and size of your video. The plugin adds a Video Encode Queue menu to the Tools menu. You will see encoding progress, the option to cancel an encoding job, and you should get an error message if something goes wrong. Users on Windows servers may get inconsistent results with the encoding queue.
+By default the plugin looks for FFMPEG in `/usr/local/bin` but if the application is installed in a different place on your server, you can point it to the correct place in the plugin settings. Users running WordPress on Windows servers should try using Linux-style paths (with forward slashes instead of backslashes and a forward slash `/` instead of `C:\`).
 
-Encoded H.264 files can be fixed for streaming using "movflags faststart" introduced in recent versions of FFMPEG/LIBAV, or qt-faststart or MP4Box if you have one of them installed in the same directory as your encoder and select it in the plugin settings. Without one of these options enabled, FFMPEG/LIBAV will place moov atoms at the end of H.264 encoded files, which forces the entire file to download before playback can start and prevents the Strobe Media player from playing them at all.
+If you have the proper libraries installed, you can choose to replace your uploaded video with an H.264 file of the same resolution, and generate as many as five additional formats depending on your original source. 1080p, 720p, or up to 480p H.264, WEBM, and OGV. Different browsers have different playback capabilities. Most desktop browsers can play H.264, and all modern mobile devices can play at least 480p H.264. If you create multiple H.264 resolutions, the highest resolution supported by the device will be served up automatically. The plugin will not upconvert your video, so if you upload a 720p video, it will not waste your time creating a 1080p version. There was a time when it seemed like a good idea to provide OGV or WEBM for some desktop browsers, but Firefox supports H.264 playback in Windows & Linux now and will soon support it in Mac. I no longer recommend encoding OGV or WEBM unless you expect a large number of no-Flash sticklers visiting your site. However, your needs may vary.
 
-If you want to make ogv, webm, or H.264 files available and can't use the FFMPEG encode button, you can upload your own files to the same directory as the original and the plugin will automatically find them. For example, if your main file is awesomevid.mp4, the plugin will look for awesomevid-1080.mp4, awesomevid-720.mp4, awesomevid-480.mp4 (up to 480p H.264), awesomevid.webm and awesomevid.ogv as well. No matter what format your original video is, you can use it in the shortcode and the plugin will attempt to find all compatible formats related to it. For example, you might have an AVI called awesomevid.avi which is not compatible with any browser, but if you have other formats encoded already, [KGVID]http://yoursite.com/awesomevid.avi[/KGVID] will ignore the incompatible AVI file, but find those other formats and embed them.
+The files will encode in the background and will take some time to complete, depending on your server setup and the length and size of your video. The plugin adds a Video Encode Queue menu to the Tools menu. You will see encoding progress, the option to cancel an encoding job, and you should get an error message if something goes wrong. Users on Windows servers may get inconsistent results with the encoding queue.
+
+Encoded H.264 files can be fixed for streaming using "movflags faststart" introduced in recent versions of FFMPEG/LIBAV, or qt-faststart or MP4Box if you have one of them installed in the same directory as your encoder and select it in the plugin settings. Without one of these options enabled, FFMPEG/LIBAV will place moov atoms at the end of H.264 encoded files, which in some cases forces the entire file to download before playback can start.
+
+If you want to make ogv, webm, or H.264 files available and can't use the FFMPEG encode button, you can upload your own files to the same directory as the original and the plugin will automatically find them. For example, if your main file is awesomevid.mp4, the plugin will look for awesomevid-1080.mp4, awesomevid-720.mp4, awesomevid-480.mp4 (up to 480p H.264), awesomevid.webm and awesomevid.ogv as well. No matter what format your original video is, you can use it in the shortcode and the plugin will attempt to find all compatible formats related to it. For example, you might have an AVI called awesomevid.avi which is not compatible with any browser, but if you have other formats encoded already, `[KGVID]http://yoursite.com/awesomevid.avi[/KGVID]` will ignore the incompatible AVI file, but find those other formats and embed them.
 
 If you want to make it easier for users to save your videos to their computers, you can choose to include a link by checking the "Generate Download Link Below Video" button.
 
@@ -53,10 +66,14 @@ To embed videos on other sites you can use code like this.
 `[KGVID poster="http://www.kylegilman.net/wp-content/uploads/2011/10/Reel-11-10-10-web_thumb2.jpg"
 width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Reel-2012-05-15-720.mp4[/KGVID]`
 
-= If you want to further modify the way the video player works, you can add the following options inside the [KGVID] tag. These will override anything you've set in the plugin settings or attachment details. =
+I'm not really a software developer. I'm just a film editor with some time on his hands who wanted to post video for clients and wasn't happy with the current state of any available software. But I want to really make this thing work, so please help me out by posting your feedback on <a href="https://github.com/kylegilman/video-embed-thumbnail-generator/issues?state=open">Github</a>.
+
+= If you want to further modify the way the video player works, you can add the following options inside the `[KGVID]` tag. These will override anything you've set in the plugin settings or attachment details. If the plugin is installed on your site, this information is also available in the post edit help screen. =
 
 * `id="xxx"` video attachment ID (instead of using a URL).
-* `videos="x"` number of attached videos to display if no URL or id is given.
+* `videos="x"` number of attached videos to display if no URL or ID is given.
+* `orderby="menu_order/title/post_date/rand/ID"` criteria for sorting attached videos if no URL or ID is given.
+* `order="ASC/DESC"` sort order.
 * `poster="http://www.example.com/image.jpg"` sets the thumbnail.
 * `endofvideooverlay="http://www.example.com/end_image.jpg` sets the image shown when the video ends.
 * `width="xxx"`
@@ -71,11 +88,18 @@ width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Re
 * `title="Video Title"` or `"false"` to disable.
 * `embedcode="html code"` changes text displayed in the embed code overlay in order to provide a custom method for embedding a video or `"false"` to disable.
 * `view_count="true/false"` turns the view count on or off.
-* `caption="Caption"`
+* `caption="Caption"` text that is displayed below the video (not subtitles or closed captioning)
 * `description="Description"` Used for metadata only.
 * `downloadlink="true/false"` generates a link below the video to make it easier for users to save the video file to their computers.
 * `right_click="true/false"` allow or disable right-clicking on the video player.
 * `resize="true/false"` allow or disable responsive resizing.
+
+= These options will add a subtitle/caption track =
+
+* `track_src="http://www.example.com/subtitles.vtt_.txt"` URL of the WebVTT file.
+* `track_kind=subtitles/captions/chapters`
+* `track_srclang=xx` the track's two-character language code (en, fr, es, etc)
+* `track_label="Track Label"` text that will be shown to the user when selecting the track.
 
 = These options will only affect Video.js playback =
 
@@ -97,11 +121,10 @@ width="720" height="404"]http://www.kylegilman.net/wp-content/uploads/2006/09/Re
 * `gallery_thumb="xxx"` width in pixels to display gallery thumbnails
 * `gallery_exclude="15"` comma separated video attachment IDs. Excludes the videos from the gallery.
 * `gallery_include="65"` comma separated video attachment IDs. Includes only these videos in the gallery. Please note that include and exclude cannot be used together.
-* `gallery_orderby="menu_order/title/post_date/rand/ID"` criteria for sorting the gallery
-* `gallery_order="ASC/DESC"` sort order
-* `gallery_id="241"` post ID to display a gallery made up of videos associated with a different post
-
-I'm not really a software developer. I'm just a film editor with some time on his hands who wanted to post video for clients and wasn't happy with the current state of any available software. But I want to really make this thing work, so please help me out by posting your feedback on <a href="https://github.com/kylegilman/video-embed-thumbnail-generator/issues?state=open">Github</a>.
+* `gallery_orderby="menu_order/title/post_date/rand/ID"` criteria for sorting the gallery.
+* `gallery_order="ASC/DESC"` sort order.
+* `gallery_id="241"` post ID to display a gallery made up of videos associated with a different post.
+* `gallery_end="close/next"` either close the pop-up or start playing the next video when the current video finishes playing.
 
 == Installation ==
 
@@ -120,9 +143,15 @@ Optional: `AddType video/mp4 .mov` will help with IE playback of .mov files but 
 
 Most of the time your video doesn't play because it's not encoded in the right format. Videos have containers like mp4, mov, ogv, mkv, flv, etc and within those containers there are video and audio codecs like H.264, MPEG-4, VP8, etc. The best option for this plugin is an mp4 container with H.264 video and AAC audio. mp4s with MPEG-4 video will not play in the Flash player, and if you don't use AAC audio you won't get any audio.
 
-If you recorded the video using a Samsung Galaxy S II phone, even though most programs will tell you it's H.264 video with AAC audio, there's a good chance that it's actually recorded in 3gp4 format, which won't work with the Flash player. Use MediaInfo Library to get really detailed information about your media files.
+Use <a href="http://mediaarea.net/en/MediaInfo">MediaInfo</a> to get really detailed information about your media files.
 
-The Strobe Media Playback Flash player will not play mp4/m4v/mov files that don't have the moov atom at the head of the file. FFMPEG puts the moov atom at the end of the file, so this can be a problem. The plugin will fix this problem on newly encoded H.264 videos if you have qt-faststart or MP4Box installed on your server.
+= Why does my video have to download completely before it starts playing? =
+
+mp4/m4v/mov files have something called a moov atom that gives the video player information about the content of the video (dimensions, duration, codecs, etc). Depending on the program you used to make your video, the moov atom can be at the beginning or the end of the file. Most video players will wait until they find the moov atom before starting playback. Otherwise it doesn't know how to display the information it's downloading. If it's at the beginning of the file, playback starts very soon after the user hits the play button. If it's at the end of the file, the whole video has to download before playback starts.
+
+There are a number of ways to fix this problem. Most video encoding programs have an option like "Web optimized," "Streaming," "Fast start," or "Progressive download." Try to find and enable that option in your program. If you can't do that, there are programs designed to move the moov atom to the head of the file. Try <a href="http://renaun.com/blog/code/qtindexswapper/">QTIndexSwapper</a> for Adobe Air (cross platform), <a href="http://www.datagoround.com/lab/">MP4 Faststart</a> for Windows, or <a href="http://mac.softpedia.com/get/Video/QTFastStart.shtml">QTFastStart</a> for Mac.
+
+FFMPEG puts the moov atom at the end of the file, so this can be a problem. The plugin will fix this problem on newly encoded H.264 videos if you have a recent version of FFMPEG and enable the "movflags faststart" option in the plugin settings or if you have qt-faststart or MP4Box installed on your server.
 
 = Why doesn't this work with YouTube? =
 
@@ -140,7 +169,7 @@ First off, don't panic.
 
 This plugin can use FFMPEG or LIBAV to make thumbnails and create alternate video formats. Unfortunately most servers don't have FFMPEG installed and most shared hosting plans don't allow you to install FFMPEG because of the system resources it requires. You're getting this error message because you don't have FFMPEG installed in the most common directory. If you know you have FFMPEG installed on your server, you'll need to find the actual path to the program and enter it in the plugin settings field `Path to applications on server`
 
-Many of the features of the plugin will work without FFMPEG. You can generate embed shortcodes for your videos and make thumbnails on any host because that part of the plugin is JavaScript running in your browser. But without FFMPEG you won't be able to automatically generate thumbnails or encode alternate formats on the server. If you don't have your own VPS or dedicated server, Dreamhost is one of the few shared hosts I know of that has FFMPEG installed and available for users.
+Most of the features of the plugin will work without FFMPEG. You can generate embed shortcodes for your videos and make thumbnails on any host because that part of the plugin is JavaScript running in your browser. But without FFMPEG you won't be able to automatically generate thumbnails or encode alternate formats on the server. If you don't have your own VPS or dedicated server, Dreamhost is one of the few shared hosts I know of that has FFMPEG installed and available for users.
 
 = How can I encode videos in directories protected by .htaccess passwords? =
 
@@ -154,6 +183,70 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.3.1 - April 8, 2014 =
+* Fixed errors when activating plugin for the first time and saving settings page in non-multisite installations.
+* Updated Video.js to version 4.5.1
+* Fixed pop-up gallery cross-origin bug for users with FORCE_SSL_ADMIN enabled.
+* Fixed error on network settings page when pressing the "Save Changes" button and resetting network settings using "Reset Options" button.
+* Added text-align:left to left-aligned galleries.
+* Added gettext calls to some text for translation.
+* Removed duplicate bitrate setting for WEBM encoding when using average bitrate.
+
+= 4.3 - March 18, 2014 =
+* Prepared plugin for internationalization. Translators welcome!
+* Finally paying attention to multisite. Several FFMPEG settings and the encode queue are now controlled at the network level if the plugin is network activated.
+* Added option to encode more than one video at a time.
+* Added JW Player option if the JW Player WordPress plugin is active.
+* Added video subtitle/captions support.
+* Revised and simplified video gallery popup method. Switched to lighter SimpleModal plugin and no longer loading jQuery-ui libraries.
+* Added "gallery_end" shortcode attribute to set an action when a pop-up video gallery video ends.
+* Added next and previous buttons to navigate between pop-up video gallery items.
+* Updated Video.js to version 4.4.3
+* Strobe Media Playback is now deprecated. New features added to the plugin might not work if this player is selected.
+* Added option to add a watermark to videos encoded with FFMPEG/LIBAV.
+* Added option to automatically generate multiple thumbnails when a video is uploaded.
+* Added option to encode more than one video at the same time.
+* Added option to turn on video download link by default.
+* Added option to set video preload attribute.
+* Added list of shortcode attribute options to the post edit help tab.
+* Added "order" and "orderby" shortcode attributes to sort videos embedded without a URL or ID specified.
+* Added float to inline videos to allow text to wrap around them.
+* Added play button overlay to gallery thumbnails when using WordPress Default player.
+* Applied video alignment setting to video galleries for center and right justifying galleries.
+* Now only loading plugin-related JavaScripts when the shortcode is used on the page and moved links to the footer to speed up page loading.
+* Added wpdb->prepare to all database queries for increased security.
+* Added nonce check when recording video play counts for increased security.
+* Fixed bug that broke responsive resizing in IE 8 and for all videos with apostrophes in their titles.
+* Fixed bug that disabled FFMPEG if the path to WordPress had spaces in it.
+* Fixed bug that generated an error if the exec function was disabled on the server using suhosin or safe mode.
+* Fixed bug that caused video encode problems when FFMPEG output contained special characters.
+* Fixed bug that generated misaligned play button arrows in some themes when using the Video.js player.
+* Fixed bug that sometimes generated jagged rows in galleries with mixed aspect ratios.
+* Fixed bug that attempted to generate thumbnails using FFMPEG if a user had previously installed FFMPEG, disabled in-browser thumbnails, then disabled FFMPEG.
+* Fixed several user capability related bugs related to users who were not assigned any roles and capabilities that were not assigned to any roles.
+* Changed video title overlay z-index to 103 to avoid floating over other elements.
+
+= 4.2.9 - November 15, 2013 =
+* Fixed bug that interfered with database queries that do not have post_meta (The Events Calendar revealed the bug, but it likely had an effect on other plugins).
+* Fixed bug that assigned auto-encoded videos to nobody.
+* Restored process to set featured image for video attachments when thumbnails are assigned.
+
+= 4.2.8 - November 11, 2013 =
+* Updated Video.js to version 4.3.0.
+* Fixed iframe embedded video auto-sizing bug.
+* Improved sizing of videos using the WordPress Default player.
+* Removed shortcode text from RSS feeds.
+* Now checking for cross-origin when making thumbnails. If video files are hosted on a different domain FFMPEG will make thumbnails to avoid cross-origin errors when saving canvas elements.
+* Fixed bug that assigned auto-generated thumbnails to nobody.
+* Fixed bug that would cause divide by zero errors when generating thumbnails from .mpg videos that had already encoded an alternate format with FFMPEG.
+
+= 4.2.7 - October 24, 2013 =
+* Fixed several video sizing issues.
+* Updated Video.js to version 4.2.2.
+* No longer loading Video.js files when using the WordPress Default player.
+* Restored [/KGVID] closing tag to inserted gallery shortcodes to avoid confusion if more than one [KGVID] is in the post.
+* Changed Settings and Donate links on Installed Plugins admin page and fixed 404 error on network dashboards.
 
 = 4.2.6 - October 19, 2013 =
 * Fixed bug that broke playback in some cases when using the shortcode without a URL.
