@@ -3,8 +3,8 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
-Tested up to: 3.9
-Stable tag: 4.3
+Tested up to: 3.8.2
+Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,6 +17,7 @@ Generates thumbnails, encodes HTML5-compliant videos, and embeds locally hosted 
 This plugin adds several fields to any video uploaded to the WordPress Media Library. Just choose a few options, make thumbnails, click "Insert into Post" and you'll get a shortcode in the post editor that will embed a flexible, responsive HTML5 video player with Flash fallback for unsupported browsers.
 
 You have the option to use a few different video players:
+
 * Video.js
 * The WordPress default player using MediaElement.js, which was introduced in WordPress version 3.6
 * JW Player (if <a href="http://wordpress.org/plugins/jw-player-plugin-for-wordpress/">their plugin</a> is installed)
@@ -50,7 +51,7 @@ The files will encode in the background and will take some time to complete, dep
 
 Encoded H.264 files can be fixed for streaming using "movflags faststart" introduced in recent versions of FFMPEG/LIBAV, or qt-faststart or MP4Box if you have one of them installed in the same directory as your encoder and select it in the plugin settings. Without one of these options enabled, FFMPEG/LIBAV will place moov atoms at the end of H.264 encoded files, which in some cases forces the entire file to download before playback can start.
 
-If you want to make ogv, webm, or H.264 files available and can't use the FFMPEG encode button, you can upload your own files to the same directory as the original and the plugin will automatically find them. For example, if your main file is awesomevid.mp4, the plugin will look for awesomevid-1080.mp4, awesomevid-720.mp4, awesomevid-480.mp4 (up to 480p H.264), awesomevid.webm and awesomevid.ogv as well. No matter what format your original video is, you can use it in the shortcode and the plugin will attempt to find all compatible formats related to it. For example, you might have an AVI called awesomevid.avi which is not compatible with any browser, but if you have other formats encoded already, [KGVID]http://yoursite.com/awesomevid.avi[/KGVID] will ignore the incompatible AVI file, but find those other formats and embed them.
+If you want to make ogv, webm, or H.264 files available and can't use the FFMPEG encode button, you can upload your own files to the same directory as the original and the plugin will automatically find them. For example, if your main file is awesomevid.mp4, the plugin will look for awesomevid-1080.mp4, awesomevid-720.mp4, awesomevid-480.mp4 (up to 480p H.264), awesomevid.webm and awesomevid.ogv as well. No matter what format your original video is, you can use it in the shortcode and the plugin will attempt to find all compatible formats related to it. For example, you might have an AVI called awesomevid.avi which is not compatible with any browser, but if you have other formats encoded already, `[KGVID]http://yoursite.com/awesomevid.avi[/KGVID]` will ignore the incompatible AVI file, but find those other formats and embed them.
 
 If you want to make it easier for users to save your videos to their computers, you can choose to include a link by checking the "Generate Download Link Below Video" button.
 
@@ -183,13 +184,23 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 
 == Changelog ==
 
+= 4.3.1 - April 8, 2014 =
+* Fixed errors when activating plugin for the first time and saving settings page in non-multisite installations.
+* Updated Video.js to version 4.5.1
+* Fixed pop-up gallery cross-origin bug for users with FORCE_SSL_ADMIN enabled.
+* Fixed error on network settings page when pressing the "Save Changes" button and resetting network settings using "Reset Options" button.
+* Added text-align:left to left-aligned galleries.
+* Added gettext calls to some text for translation.
+* Removed duplicate bitrate setting for WEBM encoding when using average bitrate.
+
 = 4.3 - March 18, 2014 =
 * Prepared plugin for internationalization. Translators welcome!
 * Finally paying attention to multisite. Several FFMPEG settings and the encode queue are now controlled at the network level if the plugin is network activated.
+* Added option to encode more than one video at a time.
 * Added JW Player option if the JW Player WordPress plugin is active.
 * Added video subtitle/captions support.
 * Revised and simplified video gallery popup method. Switched to lighter SimpleModal plugin and no longer loading jQuery-ui libraries.
-* Added "gallery_ended" shortcode attribute to set an action when a pop-up video gallery video ends.
+* Added "gallery_end" shortcode attribute to set an action when a pop-up video gallery video ends.
 * Added next and previous buttons to navigate between pop-up video gallery items.
 * Updated Video.js to version 4.4.3
 * Strobe Media Playback is now deprecated. New features added to the plugin might not work if this player is selected.
