@@ -3,7 +3,7 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
-Tested up to: 3.8.2
+Tested up to: 3.9
 Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -162,6 +162,34 @@ WordPress already has <a href="http://codex.wordpress.org/Embeds">a built-in sys
 If you're like most users and don't have FFMPEG installed on your server, the plugin relies on your browser's built-in ability to play videos. Google Chrome is best when making thumbnails because it supports the most formats. Wikipedia has <a href="http://en.wikipedia.org/wiki/HTML5_video#Browser_support">a great chart that explains which browsers work with which video formats</a>.
 
 If you were able to make thumbnails using FFMPEG before updating to version 4.2, try disabling in-browser thumbnail creation in the FFMPEG Settings tab of the plugin settings.
+
+= How can I change the watermark's size or position? =
+
+The watermark option is a simple image overlay and is styled using CSS. The default styling is
+
+`.kgvid_watermark img {
+  display: block;
+  position: absolute;
+  bottom: 7%;
+  right: 5%;
+  z-index: 1;
+  margin: 0px;
+  max-width: 10%;
+  box-shadow: none;
+}`
+
+You can override any of those settings in either your theme's custom CSS area or using the Jetpack "Custom CSS" module. If you want to make the watermark bigger, try something like
+
+`.kgvid_watermark img {
+  max-width: 20%;
+}`
+
+If you want to put it in the upper left instead of the lower right, try something like this:
+
+`.kgvid_watermark img {
+  top: 7%;
+  left: 5%;
+}`
 
 = I'm getting an error message FFMPEG not found at /usr/local/bin/. You can embed existing videos, but video thumbnail generation and Mobile/HTML5 video encoding is not possible without FFMPEG. =
 
