@@ -49,7 +49,7 @@ function kgvid_default_options_fn() {
 	$edit_others_capable = kgvid_check_if_capable('edit_others_posts');
 
 	$options = array(
-		"version" => 4.301,
+		"version" => 4.302,
 		"embed_method" => "Video.js",
 		"jw_player_id" => "",
 		"template" => false,
@@ -144,6 +144,7 @@ function kgvid_default_options_fn() {
 function kgvid_default_network_options() {
 
 	$default_options = kgvid_default_options_fn();
+
 	$network_options = array(
 		'app_path' => $default_options['app_path'],
 		'video_app' => $default_options['video_app'],
@@ -154,6 +155,7 @@ function kgvid_default_network_options() {
 		'threads' => $default_options['threads'],
 		'ffmpeg_exists' => $default_options['ffmpeg_exists'],
 		'default_capabilities' => $default_options['capabilities'],
+		'superadmin_only_ffmpeg_settings' => false,
 		'simultaneous_encodes' => $default_options['simultaneous_encodes']
 	);
 
@@ -564,7 +566,7 @@ function kgvid_check_ffmpeg_exists($options, $save) {
 		if (function_exists('escapeshellcmd')) {
 			$exec_enabled = true;
 			$test_path = rtrim($options['app_path'], '/');
-			$cmd = escapeshellcmd($test_path.'/'.$options['video_app'].' -i "'.plugin_dir_path(__FILE__).'images/sample-video-h264.mp4" -vframes 1 -f mjpeg '.$uploads['path'].'/ffmpeg_exists_test.jpg');
+			$cmd = escapeshellcmd($test_path.'/'.$options['video_app'].' -i "'.plugin_dir_path(__FILE__).'images/sample-video-h264.mp4" -vframes 1 -f mjpeg '.$uploads['path'].'/ffmpeg_exists_test.jpg').' 2>&1';
 			exec ( $cmd, $output, $returnvalue );
 		}
 		else { $function = "ESCAPESHELLCMD"; }
@@ -576,7 +578,7 @@ function kgvid_check_ffmpeg_exists($options, $save) {
 		if ( !file_exists($uploads['path'].'/ffmpeg_exists_test.jpg') ) { //if FFMPEG has not executed successfully
 			$test_path = substr($test_path, 0, -strlen($options['video_app'])-1 );
 			$cmd = escapeshellcmd($test_path.'/'.$options['video_app'].' -i "'.plugin_dir_path(__FILE__).'images/sample-video-h264.mp4" -vframes 1 -f mjpeg '.$uploads['path'].'/ffmpeg_exists_test.jpg');
-			exec ( $cmd, $output, $returnvalue );
+			exec ( $cmd );
 		}
 
 		if ( file_exists($uploads['path'].'/ffmpeg_exists_test.jpg') ) { //FFMEG has executed successfully
@@ -599,11 +601,10 @@ function kgvid_check_ffmpeg_exists($options, $save) {
 
 	}
 
-	$output_output = implode("/n", $output);
 	$arr = array (
 		"exec_enabled"=>$exec_enabled,
 		"ffmpeg_exists"=>$ffmpeg_exists,
-		"output"=>$output_output,
+		"output"=>$output,
 		"function"=>$function,
 		"app_path"=>$options['app_path']
 	);
@@ -1105,7 +1106,7 @@ function kgvid_video_embed_enqueue_scripts() {
 
 	//Video.js styles
 	if ( $options['embed_method'] == "Video.js" || $options['embed_method'] == "Strobe Media Playback" ) {
-		wp_enqueue_style( 'video-js', plugins_url("", __FILE__).'/video-js/video-js.css', '', '4.5.1' );
+		wp_enqueue_style( 'video-js', plugins_url("", __FILE__).'/video-js/video-js.css', '', '4.6.3' );
 		wp_enqueue_style( 'video-js-kg-skin', plugins_url("", __FILE__).'/video-js/kg-video-js-skin.css', '', $options['version'] );
 	}
 
@@ -1178,7 +1179,9 @@ function kgvid_video_embed_print_scripts() {
 	$options = kgvid_get_options();
 
 	wp_register_script( 'kgvid_video_embed', plugins_url("/js/kgvid_video_embed.js", __FILE__), array('jquery'), $options['version'], true );
-	wp_register_script( 'video-js', plugins_url("", __FILE__).'/video-js/video.js', '', '4.5.1', true );
+	wp_register_script( 'video-js', plugins_url("", __FILE__).'/video-js/video.js', '', '4.6.3', true );
+	//wp_register_script( 'video-js-resolutions', plugins_url("", __FILE__).'/video-js/resolutions/video-js-resolutions.js', array('video-js'), $options['version'], true );
+	//wp_register_script( 'video-quality-selector', plugins_url("", __FILE__).'/video-js/video-quality-selector/video-quality-selector.js', array('video-js'), $options['version'], true );
 	wp_register_script( 'simplemodal', plugins_url("/js/jquery.simplemodal.1.4.5.min.js", __FILE__), '', '1.4.5', true );
 
 	wp_localize_script( 'kgvid_video_embed', 'kgvid_ajax_object', array( 'ajaxurl' => admin_url( 'admin-ajax.php', is_ssl() ? 'admin' : 'http' ), 'ajax_nonce' => wp_create_nonce('kgvid_frontend_nonce') ) ); // setting ajaxurl
@@ -1220,9 +1223,9 @@ function kgvid_video_embed_print_scripts() {
 }
 add_action('wp_head', 'kgvid_video_embed_print_scripts', 99);
 
-function kgvid_print_vidojs_footer() { //called by the shortcode if Video.js is used
+function kgvid_print_videojs_footer() { //called by the shortcode if Video.js is used
 
-	echo '<script type="text/javascript">if(typeof videojs !== "undefined") { videojs.options.flash.swf = "'.plugins_url("", __FILE__).'/video-js/video-js.swf?4.4.0"; }</script>'."\n";
+	echo '<script type="text/javascript">if(typeof videojs !== "undefined") { videojs.options.flash.swf = "'.plugins_url("", __FILE__).'/video-js/video-js.swf?4.4.1"; }</script>'."\n";
 
 }
 
@@ -1307,7 +1310,7 @@ function KGVID_shortcode($atts, $content = ''){
 
 		if ( $options['embed_method'] != "WordPress Default" ) {
 			wp_enqueue_script( 'video-js' );
-			add_action('wp_footer', 'kgvid_print_vidojs_footer', 99);
+			add_action('wp_footer', 'kgvid_print_videojs_footer', 99);
 		}
 
 		if ( $options['embed_method'] == "Strobe Media Playback" ) {
@@ -1322,6 +1325,15 @@ function KGVID_shortcode($atts, $content = ''){
 		$query_atts = kgvid_shortcode_atts($atts);
 
 		if ( $query_atts["gallery"] != "true" ) { //if this is not a pop-up gallery
+
+			$video_format_labels = array(
+				'mobile' => '480p',
+				'720' => '720p',
+				'1080' => '1080p',
+				'original' => 'Full',
+				'webm' => 'WEBM',
+				'ogg' => 'OGV'
+			);
 
 			if ( empty($content) ) {
 				if ( !empty($query_atts["id"]) ) {
@@ -1364,6 +1376,7 @@ function KGVID_shortcode($atts, $content = ''){
 				$query_atts = kgvid_shortcode_atts($atts); //reset values so they can be different with multiple videos
 				$content = $original_content;
 				$sources = array();
+				$mp4already = false;
 
 				$compatible = array("flv", "f4v", "mp4", "mov", "m4v", "ogv", "ogg", "webm");
 				$h264compatible = array("mp4", "mov", "m4v");
@@ -1379,8 +1392,10 @@ function KGVID_shortcode($atts, $content = ''){
 					$encodevideo_info = kgvid_encodevideo_info($content, $id);
 					$attachment_info = get_post( $id );
 
+					$dimensions = kgvid_set_video_dimensions($id);
+					$video_format_labels['original'] = $dimensions['actualheight'].'p';
+
 					if ( empty($atts['width']) ) {
-						$dimensions = kgvid_set_video_dimensions($id);
 						$query_atts['width'] = $dimensions['width'];
 						$query_atts['height'] = $dimensions['height'];
 					}
@@ -1423,7 +1438,7 @@ function KGVID_shortcode($atts, $content = ''){
 
 				$video_formats = kgvid_video_formats();
 				unset($video_formats['fullres']);
-				$video_formats['original'] = array( "type" => $moviefiletype, "name" => "Full" );
+				$video_formats = array('original' => array( "type" => $moviefiletype, "name" => "Full" ) ) + $video_formats;
 
 				if ( in_array($moviefiletype, $compatible) ) {
 					$encodevideo_info["original_exists"] = true;
@@ -1453,10 +1468,11 @@ function KGVID_shortcode($atts, $content = ''){
 
 				$code .= '<div id="kgvid_'.$div_suffix.'_wrapper" class="kgvid_wrapper'.$aligncode.'">'."\n\t\t\t";
 				$code .= '<div id="video_'.$div_suffix.'_div" class="fitvidsignore kgvid_videodiv" data-id="'.$div_suffix.'" itemscope itemtype="http://schema.org/VideoObject">';
-				if ( $query_atts["poster"] != '' ) { $code .= '<meta itemprop="thumbnailURL" content="'.esc_attr($query_atts["poster"]).'" />'; }
+				if ( $query_atts["poster"] != '' ) { $code .= '<meta itemprop="thumbnailUrl" content="'.esc_attr($query_atts["poster"]).'" />'; }
 				if ( !empty($id) ) { $schema_embedURL = site_url('/')."?attachment_id=".$id."&amp;kgvid_video_embed[enable]=true"; }
 				else { $schema_embedURL = $content; }
-				$code .= '<meta itemprop="embedURL" content="'.esc_attr($schema_embedURL).'" />';
+				$code .= '<meta itemprop="embedUrl" content="'.esc_attr($schema_embedURL).'" />';
+				$code .= '<meta itemprop="contentUrl" content="'.$content.'" />';
 
 				if ( !empty($query_atts['title']) ) { $code .= '<meta itemprop="name" content="'.esc_attr($query_atts['title']).'" />'; }
 				if ( !empty($query_atts['description']) ) { $description = $query_atts['description']; }
@@ -1487,7 +1503,6 @@ function KGVID_shortcode($atts, $content = ''){
 
 				if ( $options['embed_method'] == "WordPress Default" ) {
 					$wp_shortcode = "[video ";
-					$mp4already = false;
 					$sources_hack = "";
 					foreach ($video_formats as $format => $format_stats) {
 						if ( $format != "original" && $encodevideo_info[$format."url"] == $content ) { unset($sources['original']); }
@@ -1528,14 +1543,7 @@ function KGVID_shortcode($atts, $content = ''){
 
 					if ( class_exists('JWP6_Shortcode') ) {
 
-						$jw_video_formats = array( 'mobile' => '480p',
-							'720' => '720p',
-							'1080' => '1080p',
-							'original' => 'Full',
-							'webm' => 'WEBM',
-							'ogg' => 'OGV'
-						);
-						foreach ($jw_video_formats as $format => $name) {
+						foreach ($video_format_labels as $format => $name) {
 							if ( $format != "original" && $encodevideo_info[$format."url"] == $content ) { unset($sources['original']); }
 							if ( $encodevideo_info[$format."_exists"] ) {
 								$sources[$format] = '{ file:\''.esc_attr($encodevideo_info[$format."url"]).'\', label:\''.$name.'\'';
@@ -1584,9 +1592,23 @@ function KGVID_shortcode($atts, $content = ''){
 
 				if ( $options['embed_method'] == "Video.js" || $options['embed_method'] == "Strobe Media Playback" ) {
 
+					$enable_resolutions_plugin = false;
+
 					foreach ($video_formats as $format => $format_stats) {
 						if ( $format != "original" && $encodevideo_info[$format."url"] == $content ) { unset($sources['original']); }
-						if ( $encodevideo_info[$format."_exists"] ) { $sources[$format] = "\t\t\t\t\t".'<source src="'.esc_attr($encodevideo_info[$format."url"]).'" type="video/'.$format_stats['type'].'">'."\n"; }
+						if ( $encodevideo_info[$format."_exists"] ) {
+							$mime_type = wp_check_filetype($encodevideo_info[$format."url"]);
+							$sources[$format] = "\t\t\t\t\t".'<source src="'.esc_attr($encodevideo_info[$format."url"]).'" type="'.$mime_type['type'].'"';
+							/* if ( $format_stats['type'] == 'mp4' ) {
+								$sources[$format] .= ' data-res="'.$video_format_labels[$format].'"';
+								if ( $mp4already ) { //there is more than one resolution available
+									wp_enqueue_script( 'video-js-resolutions' );
+									$enable_resolutions_plugin = true;
+								}
+								$mp4already = true;
+							} */
+							$sources[$format] .= '>'."\n";
+						}
 					}
 
 					$code .= '<video id="video_'.$div_suffix.'" ';
@@ -1633,7 +1655,7 @@ function KGVID_shortcode($atts, $content = ''){
 					if ( $query_atts['embedcode'] != "false" ) {
 						if ( $query_atts['embedcode'] == "true" ) { $iframeurl = site_url('/')."?attachment_id=".$id."&amp;kgvid_video_embed[enable]=true"; }
 						else { $iframeurl = $query_atts['embedcode']; }
-						$iframecode = "<iframe src='".$iframeurl."' frameborder='0' scrolling='no' width='".esc_attr($query_atts['width'])."' height='".esc_attr($query_atts["height"])."'></iframe>";
+						$iframecode = "<iframe allowfullscreen src='".$iframeurl."' frameborder='0' scrolling='no' width='".esc_attr($query_atts['width'])."' height='".esc_attr($query_atts["height"])."'></iframe>";
 						$code .= "\t\t\t\t<div id=\"video_".$div_suffix."_embed\" class=\"kgvid_share\"><span>"._x('Embed:', 'precedes code for embedding video', 'video-embed-thumbnail-generator')." </span><input type=\"text\" value=\"".esc_attr($iframecode)."\" onClick=\"this.select();\"></div>\n";
 					}
 					if ( $query_atts['title'] != "false" && $options['embed_method'] != "JW Player" ) {
@@ -1658,6 +1680,10 @@ function KGVID_shortcode($atts, $content = ''){
 					'resize' => $query_atts['resize'],
 					'right_click' => $query_atts['right_click']
 				);
+
+				if ( $options['embed_method'] == "Video.js" ) {
+					$video_variables['resolutions_plugin'] = $enable_resolutions_plugin;
+				}
 
 				if ( $options['embed_method'] == "Strobe Media Playback" && $flash_settings['flash_source_found'] ) {
 
@@ -2166,7 +2192,7 @@ function kgvid_FFMPEG_Queue_Page() {
 }
 
 function kgvid_add_network_settings_page() {
-		add_submenu_page('settings.php', _x('Video Embed & Thumbnail Generator', 'Settings page title', 'video-embed-thumbnail-generator'), __('Video Embed & Thumbnail Generator', 'Settings page title in admin sidebar', 'video-embed-thumbnail-generator'), 'manage_network_options', __FILE__, 'kgvid_network_settings_page' );
+		add_submenu_page('settings.php', _x('Video Embed & Thumbnail Generator', 'Settings page title', 'video-embed-thumbnail-generator'), _x('Video Embed & Thumbnail Generator', 'Settings page title in admin sidebar', 'video-embed-thumbnail-generator'), 'manage_network_options', __FILE__, 'kgvid_network_settings_page' );
 }
 add_action('network_admin_menu', 'kgvid_add_network_settings_page');
 
@@ -2246,6 +2272,10 @@ function kgvid_network_settings_page() {
 					<th scope='row'><label><?php _e('User capabilties for new sites:', 'video-embed-thumbnail-generator'); ?></label></th>
 					<td><?php kgvid_user_roles_callback('network'); ?></td>
 				</tr>
+				<tr>
+					<th scope='row'><label><?php _e('Super Admins only:', 'video-embed-thumbnail-generator'); ?></label></th>
+					<td><?php kgvid_superadmin_capabilities_callback(); ?></td>
+				</tr>
 			</tbody>
 		</table>
 		<p class='submit'>
@@ -2253,7 +2283,7 @@ function kgvid_network_settings_page() {
    		   <?php submit_button(__('Reset Options', 'video-embed-thumbnail-generator'), 'secondary', 'video-embed-thumbnail-generator-reset', false); ?>
    		</p>
    		</form>
-   		<div class="kgvid-blue-box">
+   		<div class="kgvid-donate-box wp-core-ui wp-ui-highlight">
 		<span><?php _e('If you\'re getting some use out of this plugin, please consider donating a few dollars to support its future development.', 'video-embed-thumbnail-generator') ?></span>
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 			<input type="hidden" name="cmd" value="_donations">
@@ -2279,14 +2309,22 @@ function kgvid_network_settings_page() {
 	<?php
 }
 
+function kgvid_superadmin_capabilities_callback() {
+
+	$network_options = get_site_option('kgvid_video_embed_network_options');
+	echo "<input ".checked( $network_options['superadmin_only_ffmpeg_settings'], "on", false )." id='superadmin_only_ffmpeg_settings' name='kgvid_video_embed_options[superadmin_only_ffmpeg_settings]' type='checkbox' /> <label for='superadmin_only_ffmpeg_settings'>".sprintf( _x('%s settings tab.', 'FFMPEG settings tab', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($network_options['video_app'])."</strong>" )."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__( sprintf( 'Only Super admins will be allowed to view and modify %s settings.', "<strong class='video_app_name'>".strtoupper($network_options['video_app'])."</strong>" ), 'video-embed-thumbnail-generator' )."</span></a>\n\t";
+
+}
+
 function kgvid_add_settings_page() {
-		add_options_page( _x('Video Embed & Thumbnail Generator', 'Settings page title', 'video-embed-thumbnail-generator'), __('Video Embed & Thumbnail Generator', 'Settings page title in admin sidebar', 'video-embed-thumbnail-generator'), 'manage_options', __FILE__, 'kgvid_settings_page' );
+		add_options_page( _x('Video Embed & Thumbnail Generator', 'Settings page title', 'video-embed-thumbnail-generator'), _x('Video Embed & Thumbnail Generator', 'Settings page title in admin sidebar', 'video-embed-thumbnail-generator'), 'manage_options', __FILE__, 'kgvid_settings_page' );
 }
 add_action('admin_menu', 'kgvid_add_settings_page');
 
 function kgvid_settings_page() {
 	wp_enqueue_media();
 	$options = kgvid_get_options();
+	$network_options = get_site_option('kgvid_video_embed_network_options');
 	$video_app = $options['video_app'];
 	if ( $video_app == "avconv" ) { $video_app = "libav"; }
 	?>
@@ -2294,7 +2332,7 @@ function kgvid_settings_page() {
 		<div class="icon32" id="icon-options-general"><br></div>
 		<h2>Video Embed & Thumbnail Generator</h2>
 		<?php if ( !is_multisite()
-			|| ( function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( plugin_basename(__FILE__) ) && $options['ffmpeg_exists'] == "on" )
+			|| ( function_exists( 'is_plugin_active_for_network' ) && is_plugin_active_for_network( plugin_basename(__FILE__) ) && $options['ffmpeg_exists'] == "on" && is_array($network_options) && (is_super_admin() || $network_options['superadmin_only_ffmpeg_settings'] == false) )
 			) { ?>
 		<h2 class="nav-tab-wrapper">
 			<a href="#" id="general_tab" class="nav-tab" onclick="kgvid_switch_settings_tab('general');"><?php _ex('General', 'Adjective, tab title', 'video-embed-thumbnail-generator') ?></a>
@@ -2310,7 +2348,7 @@ function kgvid_settings_page() {
    		   <?php submit_button(__('Reset Options', 'video-embed-thumbnail-generator'), 'secondary', 'video-embed-thumbnail-generator-reset', false); ?>
    		</p>
 		</form>
-		<div class="kgvid-blue-box">
+		<div class="kgvid-donate-box wp-core-ui wp-ui-highlight">
 		<span><?php _e('If you\'re getting some use out of this plugin, please consider donating a few dollars to support its future development.', 'video-embed-thumbnail-generator') ?></span>
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 			<input type="hidden" name="cmd" value="_donations">
@@ -2362,7 +2400,17 @@ function kgvid_video_embed_options_init() {
 			}
 			update_site_option('kgvid_video_embed_network_options', $network_options);
 
-		}//end setting network options
+		}//end setting initial network options
+		else { //network options introduced in version 4.3 exist already
+
+			if ( !array_key_exists('superadmin_only_ffmpeg_settings', $network_options) ) {
+				$default_network_options = kgvid_default_network_options();
+				$network_options['superadmin_only_ffmpeg_settings'] = $default_network_options['superadmin_only_ffmpeg_settings'];
+				update_site_option('kgvid_video_embed_network_options', $network_options);
+			}
+
+		}
+
 
 		$network_queue = get_site_option('kgvid_video_embed_queue');
 
@@ -2431,7 +2479,7 @@ function kgvid_video_embed_options_init() {
 	add_settings_field('thumb_parent', __('Attach thumbnails to:', 'video-embed-thumbnail-generator'), 'kgvid_thumb_parent_callback', __FILE__, 'kgvid_video_embed_plugin_settings', array( 'label_for' => 'thumb_parent' ) );
 	add_settings_field('delete_children', __('Delete associated attachments:', 'video-embed-thumbnail-generator'), 'kgvid_delete_children_callback', __FILE__, 'kgvid_video_embed_plugin_settings', array( 'label_for' => 'delete_children' ) );
 	add_settings_field('titlecode', __('Video title text HTML formatting:', 'video-embed-thumbnail-generator'), 'kgvid_titlecode_callback', __FILE__, 'kgvid_video_embed_plugin_settings', array( 'label_for' => 'titlecode' ) );
-	add_settings_field('template', __('Attachment template display:', 'video-embed-thumbnail-generator'), 'kgvid_template_callback', __FILE__, 'kgvid_video_embed_plugin_settings', array( 'label_for' => 'template' ) );
+	add_settings_field('template', __('Attachment page design:', 'video-embed-thumbnail-generator'), 'kgvid_template_callback', __FILE__, 'kgvid_video_embed_plugin_settings', array( 'label_for' => 'template' ) );
 
 	if ( !is_plugin_active_for_network( plugin_basename(__FILE__) ) ) {
 		add_settings_field('app_path', __('Path to applications folder on server:', 'video-embed-thumbnail-generator'), 'kgvid_app_path_callback', __FILE__, 'kgvid_video_embed_encode_settings', array( 'label_for' => 'app_path' ) );
@@ -2508,7 +2556,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['embed_method']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Video.js is the default player. Users running WordPress 3.6 or higher can choose the WordPress Default Mediaelement.js player which may already be skinned to match your theme. If the JW Player WordPress plugin is active it should be available as a video player. In the past this plugin used Adobe\'s Strobe Media Playback Flash player, which hasn\'t been updated since 2011 and is not recommended. It should still work, but new plugin functions are not guaranteed to be compatible.', 'video-embed-thumbnail-generator')."</span></a>".$jw_player_select."</td></tr></tbody></table>\n";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Video.js is the default player. Users running WordPress 3.6 or higher can choose the WordPress Default Mediaelement.js player which may already be skinned to match your theme. If the JW Player WordPress plugin is active it should be available as a video player. In the past this plugin used Adobe\'s Strobe Media Playback Flash player, which hasn\'t been updated since 2011 and is not recommended. It should still work, but new plugin functions are not guaranteed to be compatible.', 'video-embed-thumbnail-generator')."</span></a>".$jw_player_select."</td></tr></tbody></table>\n";
 
 		$sampleheight = intval($options['height']) + 50;
 		echo "<div class='kgvid_setting_nearvid' style='width:".$options['width']."px;'>";
@@ -2564,7 +2612,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 	function kgvid_dimensions_callback() {
 		$options = kgvid_get_options();
 		echo __('Width:', 'video-embed-thumbnail-generator')." <input class='small-text affects_player' id='width' name='kgvid_video_embed_options[width]' type='text' value='".$options['width']."' /> ".__('Height:', 'video-embed-thumbnail-generator')." <input class='small-text affects_player' id='height' name='kgvid_video_embed_options[height]' type='text' value='".$options['height']."' /> ";
-		echo "<input ".checked( $options['minimum_width'], "on", false )." id='minimum_width' name='kgvid_video_embed_options[minimum_width]' type='checkbox' /> <label for='minimum_width'>".__('Enlarge lower resolution videos to max width.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Usually if a video\'s resolution is less than the max width, the video player is set to the actual width of the video. Enabling this will always set the same width regardless of the quality of the video. When necessary you can override by setting the dimensions manually.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "<input ".checked( $options['minimum_width'], "on", false )." id='minimum_width' name='kgvid_video_embed_options[minimum_width]' type='checkbox' /> <label for='minimum_width'>".__('Enlarge lower resolution videos to max width.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Usually if a video\'s resolution is less than the max width, the video player is set to the actual width of the video. Enabling this will always set the same width regardless of the quality of the video. When necessary you can override by setting the dimensions manually.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_gallery_dimensions_callback() {
@@ -2612,7 +2660,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['preload']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select><a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>"._x('Controls how much of a video to load before the user starts playback. Mobile browsers never preload any video information. Selecting "metadata" will load the height and width and format information along with a few seconds of the video in some desktop browsers. "Auto" will preload nearly a minute of video in most desktop browsers. "None" will prevent all data from preloading.', 'Suggest not translating the words in quotation marks', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "</select><a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>"._x('Controls how much of a video to load before the user starts playback. Mobile browsers never preload any video information. Selecting "metadata" will load the height and width and format information along with a few seconds of the video in some desktop browsers. "Auto" will preload nearly a minute of video in most desktop browsers. "None" will prevent all data from preloading.', 'Suggest not translating the words in quotation marks', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_js_skin_callback() {
@@ -2720,13 +2768,13 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 		if ( $options['embeddable'] != "on" ) { $embed_disabled = " disabled='disabled'"; }
 		else { $embed_disabled = ""; }
 		echo "<input class='affects_player' ".checked( $options['embeddable'], "on", false )." id='embeddable' name='kgvid_video_embed_options[embeddable]' type='checkbox' onclick='kgvid_embeddable_switch(this.checked);' /> <label for='embeddable'>".__('Allow users to embed your videos on other sites.', 'video-embed-thumbnail-generator')."</label><br />";
-		echo "<input ".checked( $options['open_graph'], "on", false )." id='open_graph' name='kgvid_video_embed_options[open_graph]' type='checkbox'".$embed_disabled." /> <label for='open_graph'>"._x('Enable Open Graph video tags', '"Open Graph" is a proper noun and might not need translation', 'video-embed-thumbnail-generator')."</label><a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Facebook and some other social media sites will use these tags to embed the first video in your post. For the majority of Facebook users who have enabled secure browsing, your video must be served via https in order to be embedded directly on the page.', 'video-embed-thumbnail-generator')."</span></a><br />";
-		echo "<input class='affects_player' ".checked( $options['right_click'], "on", false )." id='right_click' name='kgvid_video_embed_options[right_click]' type='checkbox' /> <label for='right_click'>".__('Allow right-clicking on videos.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('We can\'t prevent a user from simply saving the downloaded video file from the browser\'s cache, but disabling right-clicking will make it more difficult for casual users to save your videos.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "<input ".checked( $options['open_graph'], "on", false )." id='open_graph' name='kgvid_video_embed_options[open_graph]' type='checkbox'".$embed_disabled." /> <label for='open_graph'>"._x('Enable Open Graph video tags', '"Open Graph" is a proper noun and might not need translation', 'video-embed-thumbnail-generator')."</label><a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Facebook and some other social media sites will use these tags to embed the first video in your post. For the majority of Facebook users who have enabled secure browsing, your video must be served via https in order to be embedded directly on the page.', 'video-embed-thumbnail-generator')."</span></a><br />";
+		echo "<input class='affects_player' ".checked( $options['right_click'], "on", false )." id='right_click' name='kgvid_video_embed_options[right_click]' type='checkbox' /> <label for='right_click'>".__('Allow right-clicking on videos.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('We can\'t prevent a user from simply saving the downloaded video file from the browser\'s cache, but disabling right-clicking will make it more difficult for casual users to save your videos.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_featured_callback() {
 		$options = kgvid_get_options();
-		echo "<input ".checked( $options['featured'], "on", false )." id='featured' name='kgvid_video_embed_options[featured]' type='checkbox' /> <label for='featured'>".__('Set generated video thumbnails as featured images.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('If your theme uses the featured image meta tag, this will automatically set a video\'s parent post\'s featured image to the most recently saved thumbnail image.', 'video-embed-thumbnail-generator')."</span></a><br /> <a class='button-secondary' href='javascript:void(0);' onclick='kgvid_set_all_featured();'>"._x('Set all as featured', 'implied "Set all thumbnails as featured"', 'video-embed-thumbnail-generator')."</a> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('If you\'ve generated thumbnails before enabling this option, this will set all existing thumbnails as featured images. Be careful!', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "<input ".checked( $options['featured'], "on", false )." id='featured' name='kgvid_video_embed_options[featured]' type='checkbox' /> <label for='featured'>".__('Set generated video thumbnails as featured images.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('If your theme uses the featured image meta tag, this will automatically set a video\'s parent post\'s featured image to the most recently saved thumbnail image.', 'video-embed-thumbnail-generator')."</span></a><br /> <a class='button-secondary' href='javascript:void(0);' onclick='kgvid_set_all_featured();'>"._x('Set all as featured', 'implied "Set all thumbnails as featured"', 'video-embed-thumbnail-generator')."</a> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('If you\'ve generated thumbnails before enabling this option, this will set all existing thumbnails as featured images. Be careful!', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_thumb_parent_callback() {
@@ -2737,7 +2785,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['thumb_parent']==$item) ? 'selected="selected"' : '';
 			echo "<option value='$item' $selected>$item</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('This depends on your theme. Thumbnails generated by the plugin can be saved as children of the video attachment or the post. Some themes use an image attached to a post instead of the built-in featured image meta tag. Version 3.x of this plugin saved all thumbnails as children of the video.', 'video-embed-thumbnail-generator')."</span></a><br /> <a class='button-secondary' href='javascript:void(0);' onclick='kgvid_switch_parents();'>".__('Set all parents', 'video-embed-thumbnail-generator')."</a> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('If you\'ve generated thumbnails before changing this option, this will set all existing thumbnails as children of your currently selected option.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('This depends on your theme. Thumbnails generated by the plugin can be saved as children of the video attachment or the post. Some themes use an image attached to a post instead of the built-in featured image meta tag. Version 3.x of this plugin saved all thumbnails as children of the video.', 'video-embed-thumbnail-generator')."</span></a><br /> <a class='button-secondary' href='javascript:void(0);' onclick='kgvid_switch_parents();'>".__('Set all parents', 'video-embed-thumbnail-generator')."</a> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('If you\'ve generated thumbnails before changing this option, this will set all existing thumbnails as children of your currently selected option.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_delete_children_callback() {
@@ -2751,23 +2799,23 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['delete_children']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('If you delete the original video you can choose to delete all associated attachments (thumbnails & videos) or keep the thumbnail.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('If you delete the original video you can choose to delete all associated attachments (thumbnails & videos) or keep the thumbnail.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_titlecode_callback() {
 		$options = kgvid_get_options();
-		echo "<input class='regular-text code' id='titlecode' name='kgvid_video_embed_options[titlecode]' type='text' value='".htmlentities(stripslashes($options['titlecode']))."' /> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('HTML tag applied to titles inserted above the video. Examples: %s. Corresponding closing tags will be applied to the end of the title automatically.', 'video-embed-thumbnail-generator'), "&lt;strong&gt;, &lt;em&gt;, &lt;H2&gt;, &lt;span class='videotitle'&gt;")."</span></a>\n\t";
+		echo "<input class='regular-text code' id='titlecode' name='kgvid_video_embed_options[titlecode]' type='text' value='".htmlentities(stripslashes($options['titlecode']))."' /> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('HTML tag applied to titles inserted above the video. Examples: %s. Corresponding closing tags will be applied to the end of the title automatically.', 'video-embed-thumbnail-generator'), "&lt;strong&gt;, &lt;em&gt;, &lt;H2&gt;, &lt;span class='videotitle'&gt;")."</span></a>\n\t";
 	}
 
 	function kgvid_template_callback() {
 		$options = kgvid_get_options();
-		$items = array(__("Video title (WP default)", 'video-embed-thumbnail-generator')=>"none", __("Video in existing template", 'video-embed-thumbnail-generator')=>"gentle", __("Video only (deprecated)", 'video-embed-thumbnail-generator')=>"old");
+		$items = array(__("Match plugin settings", 'video-embed-thumbnail-generator')=>"gentle", __("WordPress default", 'video-embed-thumbnail-generator')=>"none", __("Video only (deprecated)", 'video-embed-thumbnail-generator')=>"old");
 		echo "<select id='template' name='kgvid_video_embed_options[template]'>";
 		foreach($items as $name => $value) {
 			$selected = ($options['template']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('By default WordPress only displays a video\'s title on the attachment page. This plugin can filter your attachment page to display the video, or completely replace your attachment template to show only the video. If you were one of the few people using iframe embed codes before version 4.0 of this plugin then you should continue to use "Video only" but otherwise it\'s not recommended.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('The plugin can filter your media attachment page to display videos using your chosen settings, or completely replace your attachment template to show only the video. If you were one of the few people using iframe embed codes before version 4.0 of this plugin then you should continue to use "Video only" but otherwise it\'s not recommended.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_encode_settings_section_callback() {
@@ -2781,7 +2829,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 	function kgvid_app_path_callback() {
 		$options = kgvid_get_options();
 		//if ( is_plugin_active_for_network( plugin_basename(__FILE__) ) ) { $options = get_site_option( 'kgvid_video_embed_network_options' ); }
-		echo "<input class='affects_ffmpeg regular-text code' id='app_path' data-ffmpeg_exists='".$options['ffmpeg_exists']."' name='kgvid_video_embed_options[app_path]' type='text' value='".$options['app_path']."' /><a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."//wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('This should be the folder where applications are installed on your server, not a direct path to an application, so it doesn\'t usually end with %1$s. Example: %2$s.', 'video-embed-thumbnail-generator'), "<code><strong class='video_app_name'>".strtoupper($options['video_app'])."</strong></code>", "<code>/usr/local/bin</code>" )."\n\t";
+		echo "<input class='affects_ffmpeg regular-text code' id='app_path' data-ffmpeg_exists='".$options['ffmpeg_exists']."' name='kgvid_video_embed_options[app_path]' type='text' value='".$options['app_path']."' /><a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('This should be the folder where applications are installed on your server, not a direct path to an application, so it doesn\'t usually end with %1$s. Example: %2$s.', 'video-embed-thumbnail-generator'), "<code><strong class='video_app_name'>".strtoupper($options['video_app'])."</strong></code>", "<code>/usr/local/bin</code>" )."\n\t";
 	}
 
 	function kgvid_video_app_callback() {
@@ -2793,7 +2841,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['video_app']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('FFMPEG split into two separate branches in 2011. The new branch is called LIBAV and executes using "avconv" instead of "ffmpeg." Both are still actively developed and FFMPEG frequently incorporates LIBAV features. Debian & Ubuntu users probably have LIBAV installed.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('FFMPEG split into two separate branches in 2011. The new branch is called LIBAV and executes using "avconv" instead of "ffmpeg." Both are still actively developed and FFMPEG frequently incorporates LIBAV features. Debian & Ubuntu users probably have LIBAV installed.', 'video-embed-thumbnail-generator')."</span></a>\n\t";
 	}
 
 	function kgvid_browser_thumbnails_callback() {
@@ -2806,7 +2854,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 	function kgvid_encode_formats_callback() {
 		$options = kgvid_get_options();
 		echo "<div class='kgvid_video_app_required'>";
-		echo "<input ".checked( $options['encode_fullres'], "on", false )." id='encode_fullres' name='kgvid_video_embed_options[encode_fullres]' type='checkbox' /> <label for='encode_fullres'>".__('Replace original with same resolution H.264', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."//wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('If you have FFMPEG/LIBAV and the proper libraries installed, you can choose to replace your uploaded video with an H.264 video, and also transcode into as many as five additional formats depending on the resolution of your original source. Different browsers have different playback capabilities. Most desktop browsers can play H.264, and all modern mobile devices can play at least 480p H.264. If you create multiple H.264 resolutions, the highest resolution supported by the device will be served up automatically. The plugin will not upconvert your video, so if you upload a 720p video, it will not waste your time creating a 1080p version. There was a time when it seemed like a good idea to provide OGV or WEBM for some desktop browsers, but even Firefox allows H.264 playback on Windows now. I no longer recommend encoding OGV or WEBM unless you expect a large number of no-Flash sticklers visiting your site.', 'video-embed-thumbnail-generator')."</span></a><br />";
+		echo "<input ".checked( $options['encode_fullres'], "on", false )." id='encode_fullres' name='kgvid_video_embed_options[encode_fullres]' type='checkbox' /> <label for='encode_fullres'>".__('Replace original with same resolution H.264', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('If you have FFMPEG/LIBAV and the proper libraries installed, you can choose to replace your uploaded video with an H.264 video, and also transcode into as many as five additional formats depending on the resolution of your original source. Different browsers have different playback capabilities. Most desktop browsers can play H.264, and all modern mobile devices can play at least 480p H.264. If you create multiple H.264 resolutions, the highest resolution supported by the device will be served up automatically. The plugin will not upconvert your video, so if you upload a 720p video, it will not waste your time creating a 1080p version. There was a time when it seemed like a good idea to provide OGV or WEBM for some desktop browsers, but even Firefox allows H.264 playback on Windows now. I no longer recommend encoding OGV or WEBM unless you expect a large number of no-Flash sticklers visiting your site.', 'video-embed-thumbnail-generator')."</span></a><br />";
 		echo "<input ".checked( $options['encode_1080'], "on", false )." id='encode_1080' name='kgvid_video_embed_options[encode_1080]' type='checkbox' /> <label for='encode_1080'>1080p H.264 <small><em>".__('(iPhone 4s+, iPad 2+, modern Android, Windows Phone 8, Chrome, Safari, IE 9+, Firefox Windows)', 'video-embed-thumbnail-generator')."</em></small></label><br />";
 		echo "<input ".checked( $options['encode_720'], "on", false )." id='encode_720' name='kgvid_video_embed_options[encode_720]' type='checkbox' /> <label for='encode_720'>720p H.264 <small><em>".__('(iPhone 4+, iPad, most Android, Chrome, Safari, IE 9+, Firefox Windows)', 'video-embed-thumbnail-generator')."</em></small></label><br />";
 		echo "<input ".checked( $options['encode_mobile'], "on", false )." id='encode_mobile' name='kgvid_video_embed_options[encode_mobile]' type='checkbox' /> <label for='encode_mobile'>480p H.264 <small><em>(iOS, Android, Windows Phone 7, Chrome, Safari, IE 9+, Firefox Windows)</em></small></label><br />";
@@ -2858,7 +2906,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 		$options = kgvid_get_options();
 		echo "<div class='kgvid_video_app_required'>";
 		echo "<table class='kgvid_htaccess'><tbody><tr><td>".__('Username:', 'video-embed-thumbnail-generator')."</td><td><input class='regular-text affects_ffmpeg' id='htaccess_login' name='kgvid_video_embed_options[htaccess_login]' type='text' value='".$options['htaccess_login']."' /></td></tr>";
-		echo "<tr><td>".__('Password:', 'video-embed-thumbnail-generator')."</td><td><input class='regular-text affects_ffmpeg' id='htaccess_password' name='kgvid_video_embed_options[htaccess_password]' type='text' value='".$options['htaccess_password']."' /> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('If your videos are htaccess protected, %s will access them using these credentials.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a></td></tr></tbody></table>";
+		echo "<tr><td>".__('Password:', 'video-embed-thumbnail-generator')."</td><td><input class='regular-text affects_ffmpeg' id='htaccess_password' name='kgvid_video_embed_options[htaccess_password]' type='text' value='".$options['htaccess_password']."' /> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('If your videos are htaccess protected, %s will access them using these credentials.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a></td></tr></tbody></table>";
 		echo "</div>\n\t";
 	}
 
@@ -2901,7 +2949,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['moov']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('By default %1$s places moov atoms at the end of H.264 encoded files, which forces the entire file to download before playback can start and can prevent Flash players from playing them at all. Since approximately October 2012 %1$s can fix the problem at the end of the encoding process by using the option `movflags faststart`. This is the easiest and fastest way to correct the problem, but older versions of %1$s will not work if you select the movflags option. If you can\'t update to a new version of %1$s, select qt-faststart or MP4Box which will run after encoding is finished if they are installed on your server.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>")."</span></a>";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('By default %1$s places moov atoms at the end of H.264 encoded files, which forces the entire file to download before playback can start and can prevent Flash players from playing them at all. Since approximately October 2012 %1$s can fix the problem at the end of the encoding process by using the option `movflags faststart`. This is the easiest and fastest way to correct the problem, but older versions of %1$s will not work if you select the movflags option. If you can\'t update to a new version of %1$s, select qt-faststart or MP4Box which will run after encoding is finished if they are installed on your server.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>")."</span></a>";
 		echo "</div>\n\t";
 	}
 
@@ -2914,7 +2962,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['rate_control']==$value) ? 'selected="selected"' : '';
 			echo "<option value='$value' $selected>$name</option>";
 		}
-		echo "</select> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Constant Rate Factor (CRF) attempts to maintain a particular quality output for the entire video and only uses bits the encoder determines are necessary. Average Bit Rate is similar to the method used in older versions of this plugin. If CRF is selected, WEBM encoding will also use the ABR setting to set a max bit rate 25% higher than the ABR. Without a max bit rate setting WEBM files are terrible quality.', 'video-embed-thumbnail-generator')."</span></a>";
+		echo "</select> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Constant Rate Factor (CRF) attempts to maintain a particular quality output for the entire video and only uses bits the encoder determines are necessary. Average Bit Rate is similar to the method used in older versions of this plugin. If CRF is selected, WEBM encoding will also use the ABR setting to set a max bit rate 25% higher than the ABR. Without a max bit rate setting WEBM files are terrible quality.', 'video-embed-thumbnail-generator')."</span></a>";
 		echo "</div>\n\t";
 	}
 
@@ -2926,21 +2974,21 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['h264_CRF']==$i) ? 'selected="selected"' : '';
 			echo "<option value='".$i."' $selected>".$i."</option>";
 		}
-		echo "</select> H.264 <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Lower values are higher quality. 18 is considered visually lossless. Default is 23.', 'video-embed-thumbnail-generator')."</span></a><br />";
+		echo "</select> H.264 <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Lower values are higher quality. 18 is considered visually lossless. Default is 23.', 'video-embed-thumbnail-generator')."</span></a><br />";
 
 		echo "<select id='webm_CRF' name='kgvid_video_embed_options[webm_CRF]' class='affects_ffmpeg'>";
 		for ($i = 4; $i <= 63; $i++ ) {
 			$selected = ($options['webm_CRF']==$i) ? 'selected="selected"' : '';
 			echo "<option value='".$i."' $selected>".$i."</option>";
 		}
-		echo "</select> WEBM <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Lower values are higher quality. Default is 10.', 'video-embed-thumbnail-generator')."</span></a><br />\n\t";
+		echo "</select> WEBM <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Lower values are higher quality. Default is 10.', 'video-embed-thumbnail-generator')."</span></a><br />\n\t";
 
 		echo "<select id='ogv_CRF' name='kgvid_video_embed_options[ogv_CRF]' class='affects_ffmpeg'>";
 		for ($i = 1; $i <= 10; $i++ ) {
 			$selected = ($options['ogv_CRF']==$i) ? 'selected="selected"' : '';
 			echo "<option value='".$i."' $selected>".$i."</option>";
 		}
-		echo "</select> OGV (qscale) <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Higher values are higher quality. Default is 6.', 'video-embed-thumbnail-generator')."</span></a>";
+		echo "</select> OGV (qscale) <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Higher values are higher quality. Default is 6.', 'video-embed-thumbnail-generator')."</span></a>";
 		echo "</div>\n\t";
 	}
 
@@ -2952,7 +3000,7 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['bitrate_multiplier']==strval($i)) ? 'selected="selected"' : '';
 			echo "<option value='$i' $selected>$i</option>";
 		}
-		echo "</select> ".__('bits per pixel.', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Default is 0.1', 'video-embed-thumbnail-generator')."</span></a><br />";
+		echo "</select> ".__('bits per pixel.', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Default is 0.1', 'video-embed-thumbnail-generator')."</span></a><br />";
 		echo "<span class='kgvid_gray_text'>1080p = <span id='1080_bitrate'>".round(floatval($options['bitrate_multiplier'])*1920*1080*30/1024)."</span> kbps<br />";
 		echo "720p = <span id='720_bitrate'>".round(floatval($options['bitrate_multiplier'])*1280*720*30/1024)."</span> kbps<br />";
 		echo "480p = <span id='360_bitrate'>".round(floatval($options['bitrate_multiplier'])*640*360*30/1024)."</span> kbps</span>";
@@ -2968,14 +3016,14 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['h264_profile']==$item) ? 'selected="selected"' : '';
 			echo "<option value='$item' $selected>$item</option>";
 		}
-		echo "</select> "._x('profile', 'H.264 profile. Might not need translation', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Lower profiles will slightly increase file sizes. This mostly depends on your need for compatability with Android devices. Main profile seems to work on recent phones, although officially Android only supports baseline. High profile is not recommended for mobile or Flash compatibility, and anything above high is designed for professional video and probably incompatible with consumer devices. Older versions of FFMPEG might ignore this setting altogether.', 'video-embed-thumbnail-generator')."</span></a><br />";
+		echo "</select> "._x('profile', 'H.264 profile. Might not need translation', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Lower profiles will slightly increase file sizes. This mostly depends on your need for compatability with Android devices. Main profile seems to work on recent phones, although officially Android only supports baseline. High profile is not recommended for mobile or Flash compatibility, and anything above high is designed for professional video and probably incompatible with consumer devices. Older versions of FFMPEG might ignore this setting altogether.', 'video-embed-thumbnail-generator')."</span></a><br />";
 		echo "<select id='h264_level' name='kgvid_video_embed_options[h264_level]' class='affects_ffmpeg'>";
 		$items = array("none", "1", "1.1", "1.2", "1.3", "2", "2.1", "2.2", "3", "3.1", "3.2", "4", "4.1", "4.2", "5", "5.1");
 		foreach($items as $item) {
 			$selected = ($options['h264_level']==$item) ? 'selected="selected"' : '';
 			echo "<option value='$item' $selected>$item</option>";
 		}
-		echo "</select> "._x('level', 'H.264 level. Might not need translation', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('3.0 is default. Lower levels will lower maximum bit rates and decoding complexity. This mostly depends on your need for compatability with mobile devices. Older versions of FFMPEG might ignore this setting altogether.', 'video-embed-thumbnail-generator')."</span></a>";
+		echo "</select> "._x('level', 'H.264 level. Might not need translation', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('3.0 is default. Lower levels will lower maximum bit rates and decoding complexity. This mostly depends on your need for compatability with mobile devices. Older versions of FFMPEG might ignore this setting altogether.', 'video-embed-thumbnail-generator')."</span></a>";
 		echo "</div>\n\t";
 	}
 
@@ -2995,8 +3043,8 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 	function kgvid_ffmpeg_options_callback() {
 		$options = kgvid_get_options();
 		echo "<div class='kgvid_video_app_required'>";
-		echo "<input class='affects_ffmpeg' onchange='if(jQuery(\"#ffmpeg_vpre\").attr(\"checked\")==\"checked\"){jQuery(\"#video_bitrate_flag\").attr(\"checked\", \"checked\");}' ".checked( $options['video_bitrate_flag'], "on", false )." id='video_bitrate_flag' name='kgvid_video_embed_options[video_bitrate_flag]' type='checkbox' /> <label for='video_bitrate_flag'>".__('Enable legacy FFMPEG "-b" and "-ba" bitrate flags.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Enable if your installed version of FFMPEG is old enough that you can\'t use the newer -b:v flags (Dreamhost users must turn this on). It may cause newer versions of FFMPEG to fail.', 'video-embed-thumbnail-generator')."</span></a><br />
-		<input class='affects_ffmpeg' onchange='if(jQuery(\"#ffmpeg_vpre\").attr(\"checked\")==\"checked\"){jQuery(\"#video_bitrate_flag\").attr(\"checked\", \"checked\");}' ".checked( $options['ffmpeg_vpre'], "on", false )." id='ffmpeg_vpre' name='kgvid_video_embed_options[ffmpeg_vpre]' type='checkbox' /> <label for='ffmpeg_vpre'>".__('Enable legacy FFMPEG parameters.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".__('Enable if your installed version of FFMPEG is old enough that libx264 requires additional configuration to operate (Dreamhost users must turn this on). This should help if you can encode WEBM or OGV files but H264/Mobile files fail. It could cause newer versions of FFMPEG to fail.', 'video-embed-thumbnail-generator')."</span></a>";
+		echo "<input class='affects_ffmpeg' onchange='if(jQuery(\"#ffmpeg_vpre\").attr(\"checked\")==\"checked\"){jQuery(\"#video_bitrate_flag\").attr(\"checked\", \"checked\");}' ".checked( $options['video_bitrate_flag'], "on", false )." id='video_bitrate_flag' name='kgvid_video_embed_options[video_bitrate_flag]' type='checkbox' /> <label for='video_bitrate_flag'>".__('Enable legacy FFMPEG "-b" and "-ba" bitrate flags.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Enable if your installed version of FFMPEG is old enough that you can\'t use the newer -b:v flags (Dreamhost users must turn this on). It may cause newer versions of FFMPEG to fail.', 'video-embed-thumbnail-generator')."</span></a><br />
+		<input class='affects_ffmpeg' onchange='if(jQuery(\"#ffmpeg_vpre\").attr(\"checked\")==\"checked\"){jQuery(\"#video_bitrate_flag\").attr(\"checked\", \"checked\");}' ".checked( $options['ffmpeg_vpre'], "on", false )." id='ffmpeg_vpre' name='kgvid_video_embed_options[ffmpeg_vpre]' type='checkbox' /> <label for='ffmpeg_vpre'>".__('Enable legacy FFMPEG parameters.', 'video-embed-thumbnail-generator')."</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".__('Enable if your installed version of FFMPEG is old enough that libx264 requires additional configuration to operate (Dreamhost users must turn this on). This should help if you can encode WEBM or OGV files but H264/Mobile files fail. It could cause newer versions of FFMPEG to fail.', 'video-embed-thumbnail-generator')."</span></a>";
 		echo "</div>\n\t";
 	}
 
@@ -3009,16 +3057,16 @@ add_action('admin_init', 'kgvid_video_embed_options_init' );
 			$selected = ($options['simultaneous_encodes']==$i) ? 'selected="selected"' : '';
 			echo "<option value='".$i."' $selected>".$i."</option>";
 		}
-		echo "</select> ".__('Simultaneous encodes.', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('Increasing the number will allow %1$s to encode more than one file at a time, but may lead to %1$s monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a><br />";
+		echo "</select> ".__('Simultaneous encodes.', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('Increasing the number will allow %1$s to encode more than one file at a time, but may lead to %1$s monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a><br />";
 
 		echo "<select id='threads' name='kgvid_video_embed_options[threads]' class='affects_ffmpeg'>";
 		for ($i = 0; $i <= 16; $i++ ) {
 			$selected = ($options['threads']==$i) ? 'selected="selected"' : '';
 			echo "<option value='".$i."' $selected>".$i."</option>";
 		}
-		echo "</select> "._x('threads', 'CPU threads. Might not need translating', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('Default is 1, which limits encoding speed but prevents encoding from using too many system resources. Selecting 0 will allow %1$s to optimize the number of threads or you can set the number manually. This may lead to %1$s monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a><br />";
+		echo "</select> "._x('threads', 'CPU threads. Might not need translating', 'video-embed-thumbnail-generator')." <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('Default is 1, which limits encoding speed but prevents encoding from using too many system resources. Selecting 0 will allow %1$s to optimize the number of threads or you can set the number manually. This may lead to %1$s monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a><br />";
 
-		echo "<input ".checked( $options['nice'], "on", false )." id='nice' name='kgvid_video_embed_options[nice]' class='affects_ffmpeg' type='checkbox' /> <label for='nice'>"._x('Run', 'execute program', 'video-embed-thumbnail-generator')."  <code>nice</code>.</label> <a class='kgvid_tooltip' href='javascript:void(0);'><img src='".network_site_url()."/wp-includes/images/blank.gif'><span class='kgvid_tooltip_classic'>".sprintf( __('Tells %1$s to run at a lower priority to avoid monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a>";
+		echo "<input ".checked( $options['nice'], "on", false )." id='nice' name='kgvid_video_embed_options[nice]' class='affects_ffmpeg' type='checkbox' /> <label for='nice'>"._x('Run', 'execute program', 'video-embed-thumbnail-generator')."  <code>nice</code>.</label> <a class='kgvid_tooltip wp-ui-text-highlight' href='javascript:void(0);'><span class='kgvid_tooltip_classic'>".sprintf( __('Tells %1$s to run at a lower priority to avoid monopolizing system resources.', 'video-embed-thumbnail-generator'), "<strong class='video_app_name'>".strtoupper($options['video_app'])."</strong>" )."</span></a>";
 		echo "</div>";
 
 	}
@@ -3240,7 +3288,11 @@ function kgvid_validate_ffmpeg_settings($input) {
 		$input['ffmpeg_exists'] = "notinstalled";
 	}
 	elseif ( $ffmpeg_info['ffmpeg_exists'] == false ) {
-		add_settings_error( __FILE__, "ffmpeg-disabled", sprintf( __('%1$s not found at %2$s. You can embed existing videos and make thumbnails with compatible browsers, but video encoding is not possible without %1$s.', 'video-embed-thumbnail-generator'), strtoupper($input['video_app']), $input['app_path'] ), "updated");
+
+		$textarea = '';
+		if ( count($ffmpeg_info['output']) > 2 ) { $textarea = '<br /><textarea rows="3" cols="70" disabled style="resize: none;">'.implode($ffmpeg_info['output'], "\n").'</textarea>'; }
+
+		add_settings_error( __FILE__, "ffmpeg-disabled", sprintf( __('%1$s is not executing correctly at %2$s. You can embed existing videos and make thumbnails with compatible browsers, but video encoding is not possible without %1$s.', 'video-embed-thumbnail-generator'), strtoupper($input['video_app']), $input['app_path'] ).'<br /><br />'.__('Error message:', 'video-embed-thumbnail-generator').' '.implode(array_slice($ffmpeg_info['output'], -2, 2), " ").$textarea, "updated");
 		$input['ffmpeg_exists'] = "notinstalled";
 	}
 
@@ -3342,8 +3394,6 @@ function kgvid_ajax_save_settings() {
 		else { //single site on the network
 			$validated_options = kgvid_video_embed_options_validate($all_settings['kgvid_video_embed_options']);
 			$options_updated = update_option('kgvid_video_embed_options', $validated_options);
-
-
 
 			if ( $validated_options['ffmpeg_exists'] == "on" ) {
 				$movie_info = kgvid_get_video_dimensions(plugin_dir_url(__FILE__)."images/sample-video-h264.mp4");
@@ -4307,7 +4357,7 @@ function kgvid_media_embedurl_process() {
 				</tr>
 				<tr>
 					<th valign="top" scope="row" class="label"><span class="alignleft"><label for="attachments-singleurl-kgflashmediaplayer-width"><?php _e('Dimensions', 'video-embed-thumbnail-generator') ?></label></span></th>
-					<td class="field"><?php _e('Width:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-width]" type="text" value="<?php echo $maxwidth; ?>" id="attachments-singleurl-kgflashmediaplayer-width" type="text" class="kgvid_50_width" onchange="kgvid_set_dimension('singleurl', 'height', this.value);" onkeyup="kgvid_set_dimension('singleurl', 'height', this.value);"> <?php _e('Height:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-height]" id="attachments-singleurl-kgflashmediaplayer-height" type="text" value="<?php echo $maxheight; ?>" class="kgvid_50_width" onchange="kgvid_set_dimension('singleurl', 'width', this.value);" onkeyup="kgvid-set-dimension('singleurl', 'width', this.value);"> <input type="checkbox" name="attachments[singleurl][kgflashmediaplayer-lockaspect]" id="attachments-singleurl-kgflashmediaplayer-lockaspect" onclick="kgvid_set_aspect('singleurl', this.checked);" checked> <label for="attachments-singleurl-kgflashmediaplayer-lockaspect"><small><?php _e('Lock to Aspect Ratio', 'video-embed-thumbnail-generator') ?></small></label>
+					<td class="field"><?php _e('Width:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-width]" type="text" value="<?php echo $maxwidth; ?>" id="attachments-singleurl-kgflashmediaplayer-width" type="text" class="kgvid_50_width" onchange="kgvid_set_dimension('singleurl', 'height', this.value);" onkeyup="kgvid_set_dimension('singleurl', 'height', this.value);"> <?php _e('Height:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-height]" id="attachments-singleurl-kgflashmediaplayer-height" type="text" value="<?php echo $maxheight; ?>" class="kgvid_50_width" onchange="kgvid_set_dimension('singleurl', 'width', this.value);" onkeyup="kgvid-set-dimension('singleurl', 'width', this.value);"> <input type="checkbox" name="attachments[singleurl][kgflashmediaplayer-lockaspect]" id="attachments-singleurl-kgflashmediaplayer-lockaspect" onclick="kgvid_set_aspect('singleurl', this.checked);" checked> <label id="singleurl-lockaspect-label" for="attachments-singleurl-kgflashmediaplayer-lockaspect"><small><?php _e('Lock to Aspect Ratio', 'video-embed-thumbnail-generator') ?></small></label>
 					<p class="help"><small><?php printf( __('Leave blank to use %sdefault dimensions', 'video-embed-thumbnail-generator'), '<a href="options-general.php?page=video-embed-thumbnail-generator/video-embed-thumbnail-generator.php" target="_blank">' ) ?></a>.</small></p></td>
 				</tr>
 				<?php if ( current_user_can('encode_videos') ) { ?>
@@ -4316,6 +4366,9 @@ function kgvid_media_embedurl_process() {
 					<td><?php echo $checkboxes['checkboxes']; ?></td>
 				</tr>
 				<?php } ?>
+				<tr>
+					<th valign="top" scope="row" class="label"><span class="alignleft"><label><?php _e('Subtitles & Captions', 'video-embed-thumbnail-generator') ?></span></label></th>
+					<td><div id="kgflashmediaplayer-singleurl-trackdiv" class="kgvid_thumbnail_box kgvid_track_box"><?php _e('Track type:', 'video-embed-thumbnail-generator') ?><select name="attachments[singleurl][kgflashmediaplayer-track][kind]" id="attachments-singleurl-kgflashmediaplayer-track_kind"><option value="subtitles"><?php _e('subtitles', 'video-embed-thumbnail-generator') ?></option><option value="captions"><?php _e('captions', 'video-embed-thumbnail-generator') ?></option><option value="chapters"><?php _e('chapters', 'video-embed-thumbnail-generator') ?></option></select><br />URL: <input name="attachments[singleurl][kgflashmediaplayer-track][src]" id="attachments-singleurl-kgflashmediaplayer-track_src" type="text" value="" class="text"><br /><?php _e('Language code:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-track][srclang]" id="attachments-singleurl-kgflashmediaplayer-track_srclang" type="text" value="" maxlength="2" style="width:40px;"><br /><?php _e('Label:', 'video-embed-thumbnail-generator') ?> <input name="attachments[singleurl][kgflashmediaplayer-track][label]" id="attachments-singleurl-kgflashmediaplayer-track_label" type="text" value="" class="text"></div></td>
 				<tr>
 					<th valign="top" scope="row" class="label"><span class="alignleft"><label>Options</span></label></th>
 					<td><input type="checkbox" <?php echo checked( $options["downloadlink"], "on", false ); ?> name="downloadlink" id="downloadlink" value="true" class="field" /><label for="downloadlink"><?php _e('Generate Download Link Below Video', 'video-embed-thumbnail-generator') ?><br /><small></em><?php _e('Makes it easier for users to download video file', 'video-embed-thumbnail-generator') ?></em></small></label></td>
@@ -4626,16 +4679,17 @@ function kgvid_enqueue_videos($postID, $movieurl, $encode_checked, $parent_id) {
 	$h264extensions = array("mp4", "m4v", "mov");
 	$video_formats = kgvid_video_formats();
 	$sanitized_url = kgvid_sanitize_url($movieurl);
-	//$movieurl = esc_url_raw(str_replace(" ", "%20", $movieurl));
 	$movieurl = $sanitized_url['movieurl'];
 	$movieurl = str_replace("https://", "http://",  $movieurl);
 	$movie_info = kgvid_get_video_dimensions($movieurl);
+	$filepath = "";
 
 	if ($movie_info['worked'] == true) { //if FFMPEG was able to open the file
 
 		$movie_width = $movie_info['width'];
 		$movie_height = $movie_info['height'];
-		if ( get_post_type($postID) == "attachment" ) {
+
+		if ( get_post_type($postID) == "attachment" ) { //if the video is in the database
 			update_post_meta($postID, '_kgflashmediaplayer-actualwidth', $movie_width);
 			update_post_meta($postID, '_kgflashmediaplayer-actualheight', $movie_height);
 			update_post_meta($postID, '_kgflashmediaplayer-duration', $movie_info['duration']);
@@ -4674,8 +4728,8 @@ function kgvid_enqueue_videos($postID, $movieurl, $encode_checked, $parent_id) {
 			if ( empty($parent_id) ) { $parent_id = get_post($postID)->post_parent; }
 
 			$queue_entry = array (
-				'attachmentID'=>$postID,
-				'parent_id'=>$parent_id,
+				'attachmentID' => $postID,
+				'parent_id' => $parent_id,
 				'movieurl' => $movieurl,
 				'encode_formats'=> $encode_formats,
 				'movie_info' => $movie_info
@@ -4796,7 +4850,7 @@ function kgvid_callffmpeg() {
 		if ( $action == "submit" && current_user_can('make_video_thumbnails') ) { kgivd_save_singleurl_poster($parent_id, $poster, $movieurl, $set_featured); }
 	}
 	else {
-			$thumbnaildisplaycode = '<strong>'.sprintf( __('Error: %1$s not found. Verify that %1$s is installed at %2$s and check the %3$sapplication path plugin setting', 'video-embed-thumbnail-generator'), strtoupper($options["video_app"]), strtoupper($options["app_path"]), '<a href="options-general.php?page=video-embed-thumbnail-generator/video-embed-thumbnail-generator.php">' ).'</a>.</strong>' ;
+			$thumbnaildisplaycode = '<strong>'.sprintf( __('Error: %1$s not found. Verify that %1$s is installed at %2$s and check the %3$sapplication path plugin setting', 'video-embed-thumbnail-generator'), strtoupper($options["video_app"]), $options["app_path"], '<a href="options-general.php?page=video-embed-thumbnail-generator/video-embed-thumbnail-generator.php">' ).'</a>.</strong>' ;
 			$arr = array ( "thumbnaildisplaycode"=>$thumbnaildisplaycode, "embed_display"=>$thumbnaildisplaycode, "lastthumbnumber"=>"break" );
 			echo json_encode($arr);
 	}//no ffmpeg

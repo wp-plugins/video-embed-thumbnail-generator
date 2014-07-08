@@ -3,7 +3,7 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
-Tested up to: 3.9
+Tested up to: 3.9.1
 Stable tag: 4.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -214,10 +214,19 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 
 == Changelog ==
 
-= 4.3.2 - April xx, 2014 =
+= 4.3.2 - June xx, 2014 =
+* Updated Video.js to version 4.6.3
+* Added Spanish, French, and Belgian translations.
+* Added multisite option to restrict FFMPEG settings access to super admins only.
+* Added better error reporting when FFMPEG isn't executing.
+* Added subtitles/captions fields to "Embed Video from URL" tab.
+* Added allowfullscreen to iframe embed codes.
 * Added fitvidsignore class to Video.js videos to help defeat FitVids.js-induced playback problems.
-* Added Spanish & French translations.
-* Added gettext calls to some text for translation.
+* Added contentUrl schema.org metadata.
+* Fixed some gettext calls for translation.
+* Fixed bug that set alternate resolution H.264 videos to type "video/h264" instead of "video/mp4".
+* Fixed missing help icons on settings pages.
+* Fixed bug that disabled aspect ratio locking in the "Embed Video from URL" tab.
 
 = 4.3.1 - April 8, 2014 =
 * Fixed errors when activating plugin for the first time and saving settings page in non-multisite installations.
@@ -501,7 +510,7 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 * Removed swfobject.js from the plugin package. Now using the one included with WordPress. WordPress 3.3.2 contains a security fix for swfobject.js and the plugin will use the fixed version if you have upgraded WordPress (which is highly recommended).
 * Added setting to customize the formatting of titles inserted by the plugin.
 * Added settings to display a custom image when videos end instead of the first frame of the video (Flash only).
-* Fixed problem with embedded FLV files giving message "Argument Error Ð Invalid parameter passed to method" when loading poster images.
+* Fixed problem with embedded FLV files giving message "Argument Error - Invalid parameter passed to method" when loading poster images.
 
 = 2.0.5 - April 20, 2012 =
 * Fixed "Wrong datatype for second argument" error on line 339 and subsequent automatic replacement of original videos with Mobile/H.264 versions whether they exist or not.
