@@ -3,8 +3,8 @@ Contributors: kylegilman
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kylegilman@gmail.com&item_name=Video%20Embed%20And%20Thumbnail%20Generator%20Plugin%20Donation
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
-Tested up to: 3.9.1
-Stable tag: 4.3.1
+Tested up to: 4.0
+Stable tag: 4.3.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -214,9 +214,10 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 
 == Changelog ==
 
-= 4.3.2 - June xx, 2014 =
-* Updated Video.js to version 4.6.3
-* Added Spanish, French, and Belgian translations.
+= 4.3.2 - July 15, 2014 =
+* Updated Video.js to version 4.6.4
+* Added Spanish, French, and Bulgarian translations.
+* Added ability to send advanced configuration attributes to JW Player. Any attributes added to the [KGVID] shortcode will be passed on without change.
 * Added multisite option to restrict FFMPEG settings access to super admins only.
 * Added better error reporting when FFMPEG isn't executing.
 * Added subtitles/captions fields to "Embed Video from URL" tab.
@@ -225,6 +226,7 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 * Added contentUrl schema.org metadata.
 * Fixed some gettext calls for translation.
 * Fixed bug that set alternate resolution H.264 videos to type "video/h264" instead of "video/mp4".
+* Fixed bug that incorrectly added "Other user's video" to video encode queue entries.
 * Fixed missing help icons on settings pages.
 * Fixed bug that disabled aspect ratio locking in the "Embed Video from URL" tab.
 
