@@ -1,15 +1,3 @@
-/*!
-Video.js Default Styles (http://videojs.com)
-Version 4.2.0
-Create your own skin at http://designer.videojs.com
-*/
-/* SKIN
-================================================================================
-The main class name for all skin-specific styles. To make your own skin,
-replace all occurances of 'vjs-default-skin' with a new name. Then add your new
-skin name to your video tag instead of the default skin.
-e.g. <video class="video-js my-skin-name">
-*/
 .kg-video-js-skin {
   color: #cccccc;
 }
@@ -229,11 +217,19 @@ fonts to show/hide properly.
   top: 0;
   left: 0;
   height: 0.5em;
+  /* assuming volume starts at 1.0 */
+
+  width: 100%;
   background: #66a8cc url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAGCAYAAADgzO9IAAAAP0lEQVQIHWWMAQoAIAgDR/QJ/Ub//04+w7ZICBwcOg5FZi5iBB82AGzixEglJrd4TVK5XUJpskSTEvpdFzX9AB2pGziSQcvAAAAAAElFTkSuQmCC) -50% 0 repeat;
 }
 .kg-video-js-skin .vjs-volume-bar .vjs-volume-handle {
   width: 0.5em;
   height: 0.5em;
+  /* Assumes volume starts at 1.0. If you change the size of the
+     handle relative to the volume bar, you'll need to update this value
+     too. */
+
+  left: 4.5em;
 }
 .kg-video-js-skin .vjs-volume-handle:before {
   font-size: 0.9em;
@@ -318,6 +314,25 @@ fonts to show/hide properly.
 .kg-video-js-skin .vjs-seek-handle:before {
   padding-top: 0.1em /* Minor adjustment */;
 }
+/* Live Mode
+--------------------------------------------------------------------------------
+*/
+.kg-video-js-skin.vjs-live .vjs-time-controls,
+.kg-video-js-skin.vjs-live .vjs-time-divider,
+.kg-video-js-skin.vjs-live .vjs-progress-control {
+  display: none;
+}
+.kg-video-js-skin.vjs-live .vjs-live-display {
+  display: block;
+}
+/* Live Display
+--------------------------------------------------------------------------------
+*/
+.kg-video-js-skin .vjs-live-display {
+  display: none;
+  font-size: 1em;
+  line-height: 3em;
+}
 /* Time Display
 --------------------------------------------------------------------------------
 */
@@ -375,9 +390,9 @@ easily in the skin designer. http://designer.videojs.com/
   vertical-align: middle;
   cursor: pointer;
   opacity: 1;
-  box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
+  box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  -webkit-box-sizing: content-box !important;
   /* Need a slightly gray bg so it can be seen on black backgrounds */
   /* background-color-with-alpha */
   background-color: rgb(40, 40, 40);
@@ -388,7 +403,7 @@ easily in the skin designer. http://designer.videojs.com/
   -webkit-border-radius: 100px;
      -moz-border-radius: 100px;
           border-radius: 100px;
-  /* box-shadow 
+  /* box-shadow
   -webkit-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
   -moz-box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
   box-shadow: 0px 0px 1em rgba(255, 255, 255, 0.25);
@@ -419,7 +434,7 @@ easily in the skin designer. http://designer.videojs.com/
   /* IE8 needs a non-glow hover state */
   background-color: #505050;
   background-color: rgba(50, 50, 50, 0.75);
-  /* box-shadow 
+  /* box-shadow
   -webkit-box-shadow: 0 0 3em #ffffff;
   -moz-box-shadow: 0 0 3em #ffffff;
   box-shadow: 0 0 3em #ffffff;
@@ -763,6 +778,46 @@ body.vjs-full-window {
   opacity: 1;
   visibility: visible;
 }
+
+
+
+
+/* Resolutions
+-------------------------------------------------------------------------------- */
+
+@font-face{
+  font-family: 'VideoJS-Resolutions';
+  src: url('resolutions/Font/fonts/VideoJS-Resolutions.eot');
+  src: url('resolutions/Font/fonts/VideoJS-Resolutions.eot?#iefix') format('embedded-opentype'),
+  url('resolutions/Font/fonts/VideoJS-Resolutions.woff') format('woff'),
+  url('resolutions/Font/fonts/VideoJS-Resolutions.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.kg-video-js-skin .vjs-resolutions-button {
+    width: 5em;
+    cursor: pointer !important;
+}
+
+/* Resolutions Icon */
+
+.kg-video-js-skin .vjs-resolutions-button .vjs-control-content:before {
+    font-family: VideoJS-Resolutions;
+    font-size: 1.5em;
+    line-height: 2em;
+    content: "\e000"; /* Gear icon */
+    width: 17px;
+    height: 17px;
+    margin: 0.5em auto 0;
+}
+
+.kg-video-js-skin .vjs-control-content:hover:before {
+text-shadow: 0em 0em 1em #FFF;
+}
+
+
+
 /* -----------------------------------------------------------------------------
 The original source of this file lives at
 https://github.com/videojs/video.js/blob/master/src/css/video-js.less */

@@ -148,6 +148,32 @@ div.kgvid_thumbnail_box {
 	padding:5px;
 }
 
+div.kgvid_track_box {
+	text-align:left;
+}
+
+div.kgvid_track_box:hover {
+	background-color: #F7F7F7;
+}
+
+.compat-item .field .kgvid_track_box input {
+	margin-top: 3px;
+}
+
+.kgvid_track_box_removeable {
+	width: 15px;
+	height: 15px;
+	float: right;
+	text-align: right;
+	font-weight: bold;
+	color: #BC0B0B;
+	cursor: pointer;
+}
+
+.kgvid_track_box_removeable:hover {
+	color: red;
+}
+
 div.kgvid_chosen_thumbnail_box {
 	border-width:6px;
 	width: 200px;
@@ -165,6 +191,10 @@ div.kgvid_thumbnail_overlay {
     background: #fff;
     opacity: 0.5;
     filter: alpha(opacity = 50); /* required for opacity to work in IE */
+}
+
+div.kgvid_video_app_required {
+	background: inherit;
 }
 
 div.kgvid_thumbnail_select {
@@ -212,18 +242,17 @@ font-weight: normal;
 }
 
 .kgvid_tooltip {
-  color: #000000; outline: none;
-  cursor: help; text-decoration: none;
+  cursor: help;
+  text-decoration: none;
   position: relative;
 }
 
-.kgvid_tooltip img {
-  width:20px;
-  height:20px;
-  background-image:url("../../../../wp-includes/images/wpicons.png");
-  background-position: -520px 0px;
-  position:relative;
-  top:6px;
+.kgvid_tooltip:before {
+	content: '\f223';
+	font-family: dashicons;
+	font-size: 16pt;
+	vertical-align: middle;
+	margin-left: 5px;
 }
 
 .kgvid_tooltip span {
@@ -256,7 +285,7 @@ font-weight: normal;
   padding: 0.2em 0 0.6em 0;
 }
 
-.kgvid_tooltip_classic { padding: 0.8em 1em; background: #FFFFAA; border: 1px solid #FFAD33; }
+.kgvid_tooltip_classic { padding: 0.8em 1em; background: #ddd; border: 2px solid #999; }
 .custom { padding: 0.5em 0.8em 0.8em 2em; }
 * html a:hover { background: transparent; }
 
@@ -472,15 +501,14 @@ td.media-icon img {
 	padding: 0;
 }
 
-.kgvid-blue-box {
+.kgvid-donate-box {
 	width: 454px;
 	margin: 30px 0;
 	padding: 20px 20px 0 20px;
-	background-color: #F0F8FF;
 	border: 2px solid #ddd;
 }
 
-.kgvid-blue-box > * {
+.kgvid-donate-box > * {
 	margin-left: auto;
 	margin-right: auto;
 	display: block;
@@ -488,4 +516,40 @@ td.media-icon img {
 	font-size: 13pt;
 	line-height: 17pt;
 	margin-bottom: 10px;
+}
+
+.kgvid_warning {
+	color:red;
+}
+
+.kgvid_50_width {
+	max-width: 50px;
+}
+
+.kgvid_user_roles {
+	display: inline-block;
+	margin: 0 45px 15px 0;
+}
+
+.kgvid_user_roles strong {
+	padding-bottom: 5px;
+	display: inline-block;
+}
+
+.kgvid_queue_message {
+	font-size: 129%;
+	margin-left: 10px;
+	color: #298CBA;
+}
+
+#jw_player_id_select {
+	margin-top: 5px;
+}
+
+#kgflashmediaplayer-table input {
+	width: auto;
+}
+
+.attachment-preview.type-video .thumbnail {
+	z-index: 0;
 }
