@@ -22,7 +22,7 @@ jQuery(document).ready(function() {
 
 });
 
-function kgvid_SetVideo(id) {
+function kgvid_SetVideo(id) { //for galleries
 
 	//set the viewport meta tag so the gallery fits in iOS
 	var viewport_meta = jQuery('meta[name="viewport"]').first();
@@ -199,6 +199,8 @@ function kgvid_setup_video(id) {
 
 		//if ( video_vars.resolutions_plugin == true ) { player.resolutions(true); }
 
+		jQuery('#video_'+id).append(jQuery('#video_'+id+'_watermark'));
+
 		if ( video_vars.set_volume != "" ) { player.volume(video_vars.set_volume); }
 		if ( video_vars.mute == "true" ) { player.muted(true); }
 
@@ -281,11 +283,11 @@ function kgvid_setup_video(id) {
 		jQuery('#video_'+id+'_div').hover(
 			function(){
 				jQuery('#video_'+id+'_meta').addClass('kgvid_video_meta_hover');
-				jQuery('#video_'+id+'_watermark').fadeOut(100);
+				//jQuery('#video_'+id+'_watermark').fadeOut(100);
 			},
 			function(){
 				jQuery('#video_'+id+'_meta').removeClass('kgvid_video_meta_hover');
-				setTimeout(function(){jQuery('#video_'+id+'_watermark').fadeIn('slow');},3000);
+				//setTimeout(function(){jQuery('#video_'+id+'_watermark').fadeIn('slow');},3000);
 			}
 		);
 	} //end if Strobe Media Playback
@@ -297,6 +299,7 @@ function kgvid_setup_video(id) {
 		player.on('loadedmetadata', function() {
 			if ( video_vars.set_volume != "" ) { player[0].volume = video_vars.set_volume; }
 			if ( video_vars.mute == "true" ) { player[0].setMuted(true); }
+			jQuery('#video_'+id+'_div .mejs-container').append(jQuery('#video_'+id+'_watermark'));
 		});
 
 		player.on('play', function kgvid_play_start(){
@@ -422,6 +425,9 @@ function kgvid_resize_video(id) {
 				jQuery('#video_'+id+'_div').height(set_height);
 				jQuery('#video_'+id).attr('width',set_width).attr('height',set_height);
 				jQuery('#video_'+id+'_html5_api').attr('width',set_width).attr('height',set_height);
+			}
+			if ( video_vars.player_type == "WordPress Default" ) {
+				jQuery('#kgvid_'+id+'_wrapper').find('.wp-video').attr('style', 'width:'+set_width+'px; height:'+set_height+'px;');
 			}
 
 			if ( video_vars.player_type == "iOS" ) {
