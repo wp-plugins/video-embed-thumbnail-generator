@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kyleg
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, preview, poster, ffmpeg, libav, embed, mobile, webm, ogg, h.264, h264, responsive, mp4, jwplayer
 Requires at least: 3.5
 Tested up to: 4.0
-Stable tag: 4.3.4
+Stable tag: 4.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -220,6 +220,10 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.3.5 - September 17, 2014 =
+* Fixed responsive height for videos using WordPress Default player.
+* Better fix for bug that prevented choosing thumbnails from the small video player in the new media library popup window in WordPress 4.0.
 
 = 4.3.4 - September 10, 2014 =
 * Updated Video.js to version 4.8.1
