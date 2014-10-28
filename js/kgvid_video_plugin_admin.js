@@ -511,7 +511,7 @@ function kgvid_enqueue_video_encode(postID) {
 		page = "queue";
 	}
 
-	var formats = new Array("fullres", "1080", "720", "mobile", "ogg", "webm");
+	var formats = new Array("fullres", "1080", "720", "mobile", "ogg", "webm", "custom");
 	var kgvid_encode = new Object();
 	jQuery.each(formats, function(key,formats) {
 		kgvid_encode[formats] = "";
@@ -525,7 +525,7 @@ function kgvid_enqueue_video_encode(postID) {
 	jQuery(encodeprogressplaceholderid).empty();
 	jQuery(encodeplaceholderid).append('<strong>'+kgvidL10n.loading+'</strong>');
 
-	jQuery.post(ajaxurl, { action:"kgvid_callffmpeg", security: kgflashmediaplayersecurity, movieurl: attachmentURL, ffmpeg_action: 'enqueue', encodeformats: kgvid_encode, attachmentID: postID, parent_id: parent_post_id, }, function(data) {
+	jQuery.post(ajaxurl, { action:"kgvid_callffmpeg", security: kgflashmediaplayersecurity, movieurl: attachmentURL, ffmpeg_action: 'enqueue', encodeformats: kgvid_encode, attachmentID: postID, parent_id: parent_post_id }, function(data) {
 
 		jQuery(encodeplaceholderid).empty();
 		jQuery(encodeprogressplaceholderid).empty();
@@ -663,7 +663,6 @@ function kgvid_insert_shortcode() {
 		shortcode += titlecode + '<span itemprop="name">' + document.getElementById('videotitle').value + '</span>' + endtitlecode + '<br />';
 	}
 	if (url !="") {
-	console.log(basename);
 		shortcode += ' [KGVID';
 		if (document.getElementById('attachments-'+basename+'-kgflashmediaplayer-poster').value !="") { shortcode += ' poster="' + document.getElementById('attachments-'+basename+'-kgflashmediaplayer-poster').value + '"'; }
 		if (document.getElementById('attachments-'+basename+'-kgflashmediaplayer-width').value !="") { shortcode += ' width="' + document.getElementById('attachments-'+basename+'-kgflashmediaplayer-width').value + '"'; }
@@ -716,6 +715,9 @@ function kgvid_delete_video(movieurl, postID, format, childID, blogID) {
 
 		jQuery.post(ajaxurl, { action: "kgvid_delete_video", security: kgflashmediaplayersecurity, movieurl: movieurl, postid: postID, format: format, childid: childID, blogid: blogID }, function(data) {
 			jQuery('#attachments-'+postID+'-kgflashmediaplayer-encode'+format).change();
+			if ( pagenow == 'settings_page_kgvid_network_video_encoding_queue-network' || pagenow == 'tools_page_kgvid_video_encoding_queue' ) { page = 'queue'; }
+			else { page = 'attachment'; }
+			kgvid_redraw_encode_checkboxes(movieurl, postID, page, blogID);
 		}, "json" );
 
 	}
@@ -876,6 +878,15 @@ function kgvid_save_plugin_settings(input_obj) {
 			}
 
 			if ( jQuery('#app_path').data('ffmpeg_exists') == "on" && jQuery(input_obj).hasClass('affects_ffmpeg') == true && jQuery('#ffmpeg_output').length != 0 ) {
+
+				if ( jQuery('.kgvid_custom_format').filter(function() { return jQuery(this).val(); }).length == 0 ) { //if there's no custom format anymore
+					if ( jQuery('#sample_format').val() == 'custom' ) { jQuery('#sample_format').val('mobile'); }
+					jQuery('#sample_format').find('option[value="custom"]').remove();
+				}
+				else {
+					if ( jQuery('#sample_format').find('option[value="custom"]').length == 0 ) { jQuery('#sample_format').append('<option value="custom">'+kgvidL10n.custom+'</option>'); }
+				}
+
 				jQuery('#ffmpeg_output').html(kgvidL10n.runningtest);
 				jQuery('#ffmpeg_h264_sample').html(data.encode_string);
 				jQuery('#ffmpeg_watermark_example').slideUp('slow');
@@ -927,19 +938,6 @@ function kgvid_embeddable_switch(checked) {
 
 function kgvid_switch_settings_tab(tab) {
 
-	if ( tab == "general" ) {
-
-		var playback_option = jQuery('#embed_method').val();
-
-		jQuery("#general_tab").addClass("nav-tab-active");
-		jQuery("#encoding_tab").removeClass("nav-tab-active");
-		jQuery('h3:eq(0), h3:eq(2)').show();
-		jQuery('table:eq(0), table:eq(1), table:eq(3)').show();
-		jQuery(".kgvid_setting_nearvid").show();
-		jQuery('h3:eq(3)').hide();
-		jQuery('table:eq(4)').hide();
-	}
-
 	if ( tab == "encoding" ) {
 
 		jQuery("#general_tab").removeClass("nav-tab-active");
@@ -962,6 +960,20 @@ function kgvid_switch_settings_tab(tab) {
 				}
 			}, "json" );
 		}
+	}
+
+	else { //General tab
+
+		var playback_option = jQuery('#embed_method').val();
+
+		jQuery("#general_tab").addClass("nav-tab-active");
+		jQuery("#encoding_tab").removeClass("nav-tab-active");
+		jQuery('h3:eq(0), h3:eq(2)').show();
+		jQuery('table:eq(0), table:eq(1), table:eq(3)').show();
+		jQuery(".kgvid_setting_nearvid").show();
+		jQuery('h3:eq(3)').hide();
+		jQuery('table:eq(4)').hide();
+
 	}
 
 	kgvid_hide_plugin_settings();
@@ -990,10 +1002,14 @@ function kgvid_hide_plugin_settings() {
 
 		if ( playback_option == "WordPress Default" || playback_option == "JW Player" ) {
 			jQuery('#js_skin').parents().eq(1).hide();
+			jQuery('#chromecast').parents().eq(1).hide();
+			jQuery('#auto_res').parents().eq(1).hide();
 		}
 
 		if ( playback_option == "Video.js" || playback_option == "Strobe Media Playback" ) {
 			jQuery('#js_skin').parents().eq(1).show();
+			jQuery('#chromecast').parents().eq(1).show();
+			jQuery('#auto_res').parents().eq(1).show();
 		}
 
 		if ( playback_option == "JW Player" ) {
@@ -1003,6 +1019,20 @@ function kgvid_hide_plugin_settings() {
 		else {
 			jQuery('#endofvideooverlay').parents().eq(1).show();
 			jQuery('#jw_player_id_select').fadeOut();
+		}
+
+	}
+
+	if ( encoding_tab ) {
+
+		var moov = jQuery('#moov').val();
+
+		if ( moov == 'none' || moov == 'movflag' ) {
+			jQuery('#moov_path_p').hide();
+		}
+		else {
+			jQuery('.kgvid_moov_option').html(moov);
+			jQuery('#moov_path_p').show();
 		}
 
 	}
@@ -1085,6 +1115,42 @@ function kgvid_switch_parents() {
 	}
 }
 
+function kgvid_auto_generate_old(type) {
+
+	var kgflashmediaplayersecurity = document.getElementById("kgvid_settings_security").value;
+
+	jQuery.post(ajaxurl, { action: "kgvid_get_generating_old", type: type, security: kgflashmediaplayersecurity }, function(count) {
+
+		if ( count > 0 ) {
+
+			if ( type == 'thumbs' ) { var set_for_sure = confirm(kgvidL10n.autothumbnailwarning+count+"\n\n "+kgvidL10n.cancel_ok); }
+			if ( type == 'encode' ) { var set_for_sure = confirm(kgvidL10n.autoencodewarning+"\n\n "+kgvidL10n.cancel_ok); }
+
+			if ( set_for_sure == true ) {
+
+				jQuery('#generate_old_'+type+'_button').parent().append('<div id="generating_old_'+type+'_meter" class="kgvid_meter"><div class="kgvid_meter_bar" style="width:0%;"><div class="kgvid_meter_text"></div></div></div><span id="generating_old_'+type+'_status"> '+kgvidL10n.processing+'</span>');
+
+				jQuery.post(ajaxurl, { action: "kgvid_generating_old", type: type, security: kgflashmediaplayersecurity });
+				var interval = setInterval(function(){kgvid_check_cms_progress(count, 'generating_old_'+type)}, 1000);
+				jQuery( '#wpbody-content' ).data('generating_old_'+type+'_interval', interval);
+
+			}// end if sure
+
+		}//end if count
+		else { alert(kgvidL10n.nothumbstomake); }
+
+	}, "text" );
+
+}
+
+function kgvid_add_old_videos_to_queue() {
+
+	var kgflashmediaplayersecurity = document.getElementById("kgvid_settings_security").value;
+
+
+
+}
+
 function kgvid_check_cms_progress(total, cms_type) {
 	var kgflashmediaplayersecurity = document.getElementById("kgvid_settings_security").value;
 	var interval = jQuery( '#wpbody-content' ).data(cms_type+'_interval');
@@ -1141,7 +1207,7 @@ function kgvid_pick_image(button) {
 				// When an image is selected, run a callback.
 				frame.on( 'select', function() {
 					// Grab the selected attachment.
-					var attachment = frame.state().get('selection').first()
+					var attachment = frame.state().get('selection').first();
 					jQuery('#'+$el.data('change')).val(attachment.attributes.url);
 					if ( $el.data('change').substr(-25) == "kgflashmediaplayer-poster" ) { jQuery('#'+$el.data('change').slice(0, -25)+'thumbnailplaceholder').html('<div class="kgvid_thumbnail_box kgvid_chosen_thumbnail_box"><img width="200" src="'+attachment.attributes.url+'"></div>'); }
 					jQuery('#'+$el.data('change')).change();
@@ -1185,13 +1251,75 @@ function kgvid_pick_attachment(button) {
 				// When an image is selected, run a callback.
 				frame.on( 'select', function() {
 					// Grab the selected attachment.
-					var attachment = frame.state().get('selection').first()
+					var attachment = frame.state().get('selection').first();
 					jQuery('#'+$el.data('change')).val(attachment.attributes.url);
 					jQuery('#'+$el.data('change')).change();
 				});
 
 				frame.open();
 		});
+
+}
+
+function kgvid_pick_format(button, parentID, mime, format, movieurl) {
+
+		var frame;
+
+		jQuery( function() {
+
+			// Build the choose from library frame.
+
+				var $el = jQuery(button);
+				event.preventDefault();
+
+				// If the media frame already exists, reopen it.
+				if ( frame ) {
+					frame.open();
+					return;
+				}
+
+				// Create the media frame.
+				frame = wp.media.frames.customHeader = wp.media({
+					// Set the title of the modal.
+					title: $el.data('choose'),
+
+					// Tell the modal to show only videos matching the mime type.
+					library: {
+						type: mime
+					},
+
+					// Customize the submit button.
+					button: {
+						// Set the text of the button.
+						text: $el.data('update'),
+						close: true
+					}
+				});
+
+				// When an image is selected, run a callback.
+				frame.on( 'select', function() {
+					// Grab the selected attachment.
+					var video = frame.state().get('selection').first();
+					var kgflashmediaplayersecurity = document.getElementsByName('attachments['+parentID+'][kgflashmediaplayer-security]')[0].value;
+
+					jQuery.post(ajaxurl, { action:"kgvid_update_child_format", security: kgflashmediaplayersecurity, parent_id: parentID, video_id: video.id, format: format }, function(data) {
+						kgvid_redraw_encode_checkboxes(movieurl, parentID, 'attachment');
+					}, "json");
+
+				});
+
+				frame.open();
+		});
+
+}
+
+function kgvid_clear_video(movieurl, postID, video_id, blog_id) {
+
+	var kgflashmediaplayersecurity = document.getElementsByName('attachments['+postID+'][kgflashmediaplayer-security]')[0].value;
+
+	jQuery.post(ajaxurl, { action:"kgvid_clear_child_format", security: kgflashmediaplayersecurity, video_id: video_id, blog_id: blog_id }, function(data) {
+		kgvid_redraw_encode_checkboxes(movieurl, postID, 'attachment');
+	}, "json");
 
 }
 
