@@ -62,6 +62,11 @@
 	box-shadow: none;
 }
 
+.kgvid_watermark a {
+	display: block;
+	position: inherit !important;
+}
+
 .vjs-control-bar, .mejs-controls {
 	z-index:2;
 }
@@ -259,6 +264,10 @@ img.kgvid_ios_novideo {
 	text-decoration: none;
 }
 
+#kgvid-simplemodal-container .wp-video {
+	margin-bottom: 0px;
+}
+
 .kgvid_gallery_prev {
 	top: -20px;
 	right: 58px;
@@ -271,6 +280,37 @@ img.kgvid_ios_novideo {
 
 #kgvid-simplemodal-container a.modalCloseImg:hover, #kgvid-simplemodal-container .kgvid_gallery_nav:hover {
 	background-color: #555;
+}
+
+.kgvid_gallery_pagination span {
+	cursor: pointer;
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	background-color: #ddd;
+	text-align: center;
+	color: #ccc;
+	border-radius: 12px;
+	font-size: 16px;
+	font-weight: 900;
+	border: 1px solid #888;
+	line-height: 20px;
+	text-decoration: none;
+}
+
+span.kgvid_gallery_pagination_arrow {
+	background: none;
+	border: none;
+}
+
+.kgvid_gallery_pagination .kgvid_gallery_pagination_selected {
+	background-color: #666;
+	cursor: default;
+}
+
+.kgvid_gallery_pagination span a {
+	border: none;
+	text-decoration: none;
 }
 
 /* video-quality-selector Video.js plugin styles */
