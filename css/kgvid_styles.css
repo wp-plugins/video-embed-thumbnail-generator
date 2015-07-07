@@ -4,6 +4,11 @@
 	max-width: 100%
 }
 
+.kgvid_gallerywrapper {
+	display: block;
+	max-width: 100%;
+}
+
 .kgvid_wrapper_auto_left {
 	margin-left: auto;
 }
@@ -24,11 +29,6 @@
 .kgvid_wrapper_inline_right {
 	float: right;
 	margin: 1em 0 0 1em;
-}
-
-.kgvid_gallerywrapper {
-	display: inline-block;
-	max-width: 100%;
 }
 
 .kgvid_textalign_left {
@@ -60,6 +60,11 @@
 	margin: 0px;
 	max-width: 10%;
 	box-shadow: none;
+}
+
+.kgvid_watermark a {
+	display: block;
+	position: inherit !important;
 }
 
 .vjs-control-bar, .mejs-controls {
@@ -259,6 +264,10 @@ img.kgvid_ios_novideo {
 	text-decoration: none;
 }
 
+#kgvid-simplemodal-container .wp-video {
+	margin-bottom: 0px;
+}
+
 .kgvid_gallery_prev {
 	top: -20px;
 	right: 58px;
@@ -271,4 +280,64 @@ img.kgvid_ios_novideo {
 
 #kgvid-simplemodal-container a.modalCloseImg:hover, #kgvid-simplemodal-container .kgvid_gallery_nav:hover {
 	background-color: #555;
+}
+
+.kgvid_gallery_pagination span {
+	cursor: pointer;
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+	background-color: #ddd;
+	text-align: center;
+	color: #ccc;
+	border-radius: 12px;
+	font-size: 16px;
+	font-weight: 900;
+	border: 1px solid #888;
+	line-height: 20px;
+	text-decoration: none;
+}
+
+span.kgvid_gallery_pagination_arrow {
+	background: none;
+	border: none;
+}
+
+.kgvid_gallery_pagination .kgvid_gallery_pagination_selected {
+	background-color: #666;
+	cursor: default;
+}
+
+.kgvid_gallery_pagination span a {
+	border: none;
+	text-decoration: none;
+}
+
+/* video-quality-selector Video.js plugin styles */
+
+.vjs-res-button span.vjs-control-text {
+	display: none;
+}
+
+.vjs-res-button:before {
+    content: "\e600"; /* Gear icon */
+}
+
+
+/* Don't show hover effects on title */
+ul li.vjs-menu-title.vjs-res-menu-title:hover {
+	cursor: default;
+	background-color: transparent;
+	color: #CCC;
+
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+/* Needed to keep text visible in video.js 4.9 */
+.vjs-res-button .vjs-control-text {
+	width: auto;
+	height: auto;
+	clip: auto;
 }
