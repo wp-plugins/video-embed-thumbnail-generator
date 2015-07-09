@@ -3,7 +3,7 @@
 Plugin Name: Video Embed & Thumbnail Generator
 Plugin URI: http://www.kylegilman.net/2011/01/18/video-embed-thumbnail-generator-wordpress-plugin/
 Description: Generates thumbnails, HTML5-compliant videos, and embed codes for locally hosted videos. Requires FFMPEG or LIBAV for encoding.
-Version: 4.5
+Version: 4.5.1
 Author: Kyle Gilman
 Author URI: http://www.kylegilman.net/
 Text Domain: video-embed-thumbnail-generator
@@ -58,7 +58,7 @@ function kgvid_default_options_fn() {
 	$edit_others_capable = kgvid_check_if_capable('edit_others_posts');
 
 	$options = array(
-		"version" => 4.5,
+		"version" => 4.501,
 		"embed_method" => "Video.js",
 		"jw_player_id" => "",
 		"template" => false,
@@ -1979,8 +1979,16 @@ function KGVID_shortcode($atts, $content = ''){
 
 				if ( !empty($id) ) { //if the video is an attachment in the WordPress db
 
-					$content = wp_get_attachment_url($id);
-					if ( $content == false ) { echo "Invalid video ID"; continue; }
+					$attachment_url = wp_get_attachment_url($id);
+					if ( $attachment_url == false ) { echo "Invalid video ID"; continue; }
+					$exempt_cdns = array('amazonaws.com', 'rackspace.com', 'netdna-cdn.com', 'nexcess-cdn.net', 'limelight.com'); //don't replace URLs that point to CDNs
+					$exempt_url = false;
+					foreach ( $exempt_cdns as $exempt_cdn ) {
+						if ( strpos($content, $exempt_cdn) !== false ) {
+							$exempt_url = true;
+						}
+					}
+					if ( !$exempt_url ) { $content = $attachment_url; }
 
 					$encodevideo_info = kgvid_encodevideo_info($content, $id);
 					$attachment_info = get_post( $id );
@@ -1997,7 +2005,7 @@ function KGVID_shortcode($atts, $content = ''){
 					if ( !empty($poster_id) ) {
 						$poster_image_src = wp_get_attachment_image_src($poster_id, 'full');
 						$query_atts['poster'] = $poster_image_src[0];
-						if ( intval($query_atts['width']) <= get_option('medium_size_h') ) {
+						if ( strpos($query_atts['width'], '%') === false && intval($query_atts['width']) <= get_option('medium_size_h') ) {
 							$query_atts['poster'] = kgvid_get_attachment_medium_url($poster_id);
 						}
 					}
@@ -5259,11 +5267,26 @@ function kgvid_video_attachment_fields_to_save($post, $attachment) {
 					update_post_meta($post['ID'], '_kgflashmediaplayer-poster-id', $thumb_id);
 				}
 			}
-			else {
+
+			if ( empty($thumb_url) ) {
 				delete_post_meta($post['ID'], '_kgflashmediaplayer-poster');
 				delete_post_meta($post['ID'], '_kgflashmediaplayer-poster-id');
+				delete_post_thumbnail($post['ID']);
 			}
-			update_post_meta($post['ID'], '_kgflashmediaplayer-poster', $thumb_url);
+			else {
+
+				update_post_meta($post['ID'], '_kgflashmediaplayer-poster', $thumb_url);
+
+				if ( empty($thumb_id) ) { //we're not saving a new thumbnail
+					$poster_id = get_post_meta($post['ID'], '_kgflashmediaplayer-poster-id', true);
+					if ( empty($poster_id) ) { //the poster_id meta was accidentally deleted
+						$thumb_url_id = kgvid_url_to_id($thumb_url);
+						if ( $thumb_url_id ) { update_post_meta($post['ID'], '_kgflashmediaplayer-poster-id', $thumb_url_id); }
+					}
+				}
+
+			}
+
 		}
 
 		if( isset($attachment['kgflashmediaplayer-featured']) ) {
