@@ -415,9 +415,9 @@ function kgvid_save_canvas_thumb(postID, time_id, total, index) {
 	var canvas = document.getElementById(postID+'_thumb_'+time_id);
 	var png64dataURL = canvas.toDataURL(); //this is what saves the image. Do this after selection.
 
-	jQuery('#attachments-'+postID+'-kgflashmediaplayer-thumbnailboxoverlay').fadeTo(500, .25);
+	jQuery('#attachments-'+postID+'-thumbnailplaceholder canvas').fadeTo(500, .25);
 	jQuery('#attachments-'+postID+'-thumbnailplaceholder input').attr('disabled', true);
-	jQuery('#attachments-'+postID+'-thumbnailplaceholder').prepend('<div class="kgvid_save_overlay">Saving...</div>')
+	jQuery('#attachments-'+postID+'-thumbnailplaceholder').prepend('<div class="kgvid_save_overlay">'+kgvidL10n.saving+'</div>')
 
 	jQuery.ajax({
 		type: "POST",
@@ -1173,12 +1173,14 @@ function kgvid_hide_plugin_settings() {
 		}
 
 		if ( playback_option == "WordPress Default" || playback_option == "JW Player" ) {
+			jQuery('#nativecontrolsfortouch').parents().eq(1).hide();
 			jQuery('#js_skin').parents().eq(1).hide();
 			jQuery('#chromecast').parents().eq(1).hide();
 			jQuery('#auto_res').parents().eq(1).hide();
 		}
 
 		if ( playback_option == "Video.js" || playback_option == "Strobe Media Playback" ) {
+			jQuery('#nativecontrolsfortouch').parents().eq(1).show();
 			jQuery('#js_skin').parents().eq(1).show();
 			jQuery('#chromecast').parents().eq(1).show();
 			jQuery('#auto_res').parents().eq(1).show();
