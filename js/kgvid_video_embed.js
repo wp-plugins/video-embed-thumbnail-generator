@@ -231,10 +231,21 @@ function kgvid_setup_video(id) {
 
 		jQuery('#video_'+id).append(jQuery('#video_'+id+'_watermark'));
 
-		setTimeout(function() {
+		player.on('loadedmetadata', function(){
+
+			var text_tracks = player.textTracks();
+			var default_track_id = jQuery('#video_'+id+'_div track[default]').first().attr('id');
+
+			if ( default_track_id != null ) {
+				jQuery(text_tracks).each(function(index, track) {
+					if ( track.id == default_track_id && track.mode != 'showing' ) { player.textTracks()[index].mode = 'showing'; }
+				});
+			}
+
 			if ( video_vars.set_volume != "" ) { player.volume(video_vars.set_volume); }
 			if ( video_vars.mute == "true" ) { player.muted(true); }
-		}, 0);
+
+		});
 
 		player.on('play', function kgvid_play_start(){
 			player.off('timeupdate', kgvid_timeupdate);
@@ -324,6 +335,8 @@ function kgvid_setup_video(id) {
 			}
 		});
 
+		if ( video_vars.autoplay == "true" && player.paused() ) { player.play(); }
+
 	} //end if Video.js
 
 	if ( video_vars.player_type == "Strobe Media Playback" || video_vars.player_type == "WordPress Default" ) {
@@ -348,12 +361,15 @@ function kgvid_setup_video(id) {
 			jQuery('#video_'+id+'_div .mejs-container').append(jQuery('#video_'+id+'_watermark'));
 		});
 
-		jQuery('#video_'+id+'_div .wp-video').one('click', function kgvid_play_start(){
+		jQuery('#video_'+id+'_div .wp-video').one('click', function(){
 			jQuery('#video_'+id+'_meta').removeClass('kgvid_video_meta_hover');
+		});
+
+		player.on('play', function(){
 			kgvid_video_counter(id, 'play');
 		});
 
-		player.on('ended', function kgvid_play_end(){
+		player.on('ended', function(){
 			kgvid_video_counter(id, 'end');
 			if ( video_vars.endofvideooverlay != "" ) {
 				jQuery('#video_'+id+'_div .mejs-poster').css({
@@ -567,7 +583,7 @@ function kgvid_resize_gallery_play_button(gallery_id) {
 				'-ms-transform': css_text
 			});
 		}
-		else { Query('#'+gallery_id+' '+button_selector).removeAttr('style'); }
+		else { jQuery('#'+gallery_id+' '+button_selector).removeAttr('style'); }
 
 	}
 

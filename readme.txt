@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kyleg
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, video thumbnail, preview, poster, ffmpeg, libav, embed, oembed, mobile, webm, ogg, h.264, h264, vp9, responsive, mp4, jwplayer, resolution
 Requires at least: 3.5
 Tested up to: 4.3
-Stable tag: 4.5
+Stable tag: 4.5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,6 +13,8 @@ Generates thumbnails, encodes HTML5-compliant videos, and embeds locally hosted 
 == Description ==
 
 = A plugin to make embedding videos, generating thumbnails, and encoding HTML5-compatible files a little bit easier. =
+
+This is probably the last completely free major release. Some advanced features will be converted to premium add-ons in the future. More info in the <a href="https://wordpress.org/support/plugin/video-embed-thumbnail-generator">support forum</a>.
 
 This plugin adds several fields to any video uploaded to the WordPress Media Library. Just choose a few options, make thumbnails, click "Insert into Post" and you'll get a shortcode in the post editor that will embed a flexible, responsive HTML5 video player with Flash fallback for unsupported browsers.
 
@@ -228,6 +230,29 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.5.4 - August 9, 2015 =
+* Added option to disable native controls on mobile devices when using the Video.js player.
+* Added Schema.org uploadDate and description tags which are required by Google for video listings.
+* Updated Video.js to version 4.12.11
+* Fixed undefined index error when editing videos with text tracks that don't have default enabled.
+* Fixed and localized "Saving..." overlay when saving browser-generated thumbnails.
+* Fixed bug that could generate an error when displaying the sample video on the plugin settings page.
+
+= 4.5.3 - July 11, 2015 =
+* Fixed error that could zero out view counts when editing videos.
+* Fixed 'strlen' error when updating videos with subtitles.
+* Attempting to enable 'default' subtitle tracks on more browsers, but implementation is inconsistent.
+
+= 4.5.2 - July 10, 2015 =
+* Fixed bug that failed to set the volume or count views when using the WordPress Default or JW Player.
+* Fixed bug that failed to count views when WordPress Default player was on autoplay.
+* Fixed Video.js inconsistent autoplay bug.
+
+= 4.5.1 - July 9, 2015 =
+* Fixed bug that accidentally deleted thumbnail image IDs from video meta when editing attachments.
+* Prevented automatic re-writing of video URLs to a local address if a popular cloud storage address is entered in the shortcode (Amazon AWS, Rackspace, etc).
+* Restored full-resolution thumbnails when width is set to a percentage.
 
 = 4.5 - July 7, 2015 =
 * This is probably the last completely free major release. Some advanced features will be converted to premium add-ons in the future. More info in the <a href="https://wordpress.org/support/plugin/video-embed-thumbnail-generator">support forum</a>.
@@ -704,6 +729,12 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 * First Release
 
 == Upgrade Notice ==
+
+= 4.5.2 =
+This is probably the last completely free major release. Some advanced features will be converted to premium add-ons in the future. More info in the support forum.
+
+= 4.5.1 =
+This is probably the last completely free major release. Some advanced features will be converted to premium add-ons in the future. More info in the support forum.
 
 = 4.5 =
 This is probably the last completely free major release. Some advanced features will be converted to premium add-ons in the future. More info in the support forum.
