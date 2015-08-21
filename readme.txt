@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=kyleg
 Tags: video, video player, video gallery, html5, shortcode, thumbnail, video thumbnail, preview, poster, ffmpeg, libav, embed, oembed, mobile, webm, ogg, h.264, h264, vp9, responsive, mp4, jwplayer, resolution
 Requires at least: 3.5
 Tested up to: 4.3
-Stable tag: 4.5.4
+Stable tag: 4.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -230,6 +230,10 @@ Enter the username & password in the plugin settings "FFMPEG Settings" tab, or u
 4. Shortcode inserted into the post content by the plugin.
 
 == Changelog ==
+
+= 4.5.5 - August 20, 2015 =
+* Fixed a number of potential infinite loops and other recursion issues related to longstanding WordPress bug <a href='https://core.trac.wordpress.org/ticket/17817'>#17817</a>.
+* Changed video player names with spaces (WordPress Default, JW Player) to one word camel case for JavaScript functions (WordPressDefault, JWPlayer).
 
 = 4.5.4 - August 9, 2015 =
 * Added option to disable native controls on mobile devices when using the Video.js player.
